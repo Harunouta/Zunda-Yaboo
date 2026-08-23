@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Zunda-Yaboo viewer</title>
+  <link rel="stylesheet" href="/app.css" />
+</head>
+<body>
+  <header class="top">
+    <h1>Zunda-Yaboo ローカル閲覧</h1>
+    <p class="sub">127.0.0.1 のみ。エンジンは読まない。JSONL を見る／短い dry-run を投げる。</p>
+  </header>
+  <main class="layout">
+    <section class="pane" id="launchPane">
+      <h2>AI / モデル</h2>
+      <p class="hint">Cursor 不要。LM Studio（OpenAI 互換）か OpenAI API。役ごとにモデル ID。保存先は <code>logs/viewer_settings.json</code>。</p>
+      <label>provider
+        <select id="provider">
+          <option value="lmstudio">lmstudio</option>
+          <option value="openai">openai</option>
+        </select>
+      </label>
+      <label>LM Studio host <input id="lmStudioHost" type="text" /></label>
+      <label>LM Studio port <input id="lmStudioPort" type="text" /></label>
+      <label>OpenAI base URL <input id="openaiBaseUrl" type="text" /></label>
+      <label>OpenAI API key <input id="openaiApiKey" type="password" autocomplete="off" /></label>
+      <label>ruler モデル <select id="roleRuler"></select></label>
+      <label>crowd モデル <select id="roleCrowd"></select></label>
+      <label>mascot モデル <select id="roleMascot"></select></label>
+      <label>opinion モデル <select id="roleOpinion"></select></label>
+      <label>agri モデル <select id="roleAgri"></select></label>
+      <button type="button" id="saveSettingsBtn">設定を保存</button>
+      <button type="button" id="probeBtn">モデルを探る</button>
+      <pre id="settingsBox" class="job"></pre>
+      <h2>設定 / 起動</h2>
+      <p class="hint">既定は 12ヶ月・`--no-llm`。1603–2026 フルは確認チェックなしでは拒否。同時1ジョブ。`--live` 相当は historicalPolicy を付けない。</p>
+      <label>standard
+        <select id="standard">
+          <option value="zunda">zunda</option>
+          <option value="anko">anko</option>
+          <option value="azuki">azuki</option>
+          <option value="edo_metal">edo_metal</option>
+          <option value="gold_yen">gold_yen</option>
+          <option value="dollar">dollar</option>
+          <option value="historical">historical</option>
+        </select>
+      </label>
+      <label>start <input id="start" type="text" value="1853-01" /></label>
+      <label>end <input id="end" type="text" value="1853-12" /></label>
+      <label>run-name <input id="runName" type="text" value="viewer_short" /></label>
+      <label class="check"><input id="noLlm" type="checkbox" checked /> --no-llm</label>
+      <label class="check"><input id="historicalPolicy" type="checkbox" /> --historical-policy（本ラン用。短デモには付けない）</label>
+      <label class="check"><input id="confirmFullSpan" type="checkbox" /> 24ヶ月超／長スパンを承知した</label>
+      <button type="button" id="launchBtn">短いランを投げる</button>
+      <button type="button" id="stopBtn">止める</button>
+      <pre id="jobBox" class="job"></pre>
+    </section>
+    <section class="pane" id="viewPane">
+      <h2>閲覧</h2>
+      <label>最近のランを探す
+        <input id="runSearch" type="text" placeholder="名前・本位・年月で絞る" />
+      </label>
+      <div id="runList" class="runList"></div>
+      <label>いま開いているラン
+        <select id="runSelect"></select>
+      </label>
+      <div class="runActions">
+        <button type="button" id="exportBtn">このランを zip で出す</button>
+        <label class="filePick">取り込む
+          <input id="importFile" type="file" accept=".zip,.jsonl,application/zip" />
+        </label>
+      </div>
+      <p class="hint">一覧は更新が新しい順。zip には monthly.jsonl とあれば launch.json・総括が入る。衝突する名前は `_imported_日時` になる。</p>
+      <label class="check"><input id="onlyEvents" type="checkbox" /> イベント月だけ</label>
+      <label class="check"><input id="onlyBigChanges" type="checkbox" /> 指標・イベントが大きく変わった月だけ</label>
+      <label class="check"><input id="onlySpeech" type="checkbox" /> マスコットがしゃべった月だけ</label>
+      <button type="button" id="reloadBtn">読み直す</button>
+      <p id="rangeMeta" class="hint"></p>
+      <p class="hint">大きな変化＝イベントあり、本位の切替、人口±0.8%、食/人円±12%、fidelity±0.04、米価±15% のいずれか。</p>
+      <p class="hint">グラフの凸凹をクリックすると、その年のイベント一覧へ飛びます（点は間引き年です）。</p>
+      <h3>人口（年次ざっくり）</h3>
+      <p class="hint">マクロ人口の年中央値。出生・死亡・移動の月次更新を、年でならしたもの。</p>
+      <canvas id="chartPop" width="720" height="160"></canvas>
+      <h3>食/人円（年次中央値）</h3>
+      <p class="hint">時代ごとの食バスケット円 ×（穀物在庫月数 ÷ 目安6ヶ月）。バッファkgをそのまま円にしていない。method=<code>era_basket_times_grain_stock</code>。</p>
+      <canvas id="chartFood" width="720" height="180"></canvas>
+      <h3>fidelity</h3>
+      <p class="hint">史実アンカーとの近さ（1に近いほど一致）。誤差は米の対数差×0.35＋金銀比×0.25＋正統性×0.20＋人口指数×0.20。score＝max(0, 1−誤差)。historical ラン向け。</p>
+      <canvas id="chartFid" width="720" height="160"></canvas>
+      <h3>米・ずんだ価格（sim）</h3>
+      <p class="hint">シミュ内部の相対価格。米 1.0 をだいたい米1kg相当として、ずんだはそこからの掛け算。現代円は PPP 側。</p>
+      <canvas id="chartPrice" width="720" height="180"></canvas>
+      <h3>期間の総括</h3>
+      <p class="hint">走り終わると、マスコット（いなければ市井の人）が期間全体の暮らしを長く振り返ります。係数は変えません。</p>
+      <button type="button" id="recapBtn">総括を（再）作る</button>
+      <article id="lifeRecapBox" class="recap"></article>
+      <label>year <input id="yearTrace" type="text" value="1853" /></label>
+      <button type="button" id="yearTraceBtn">その年を見る</button>
+      <div id="yearTraceBox"></div>
+      <h3>発生したイベント</h3>
+      <p class="hint">riot_risk は除く。月をクリックすると下の一覧で展開します。</p>
+      <ul id="eventLog"></ul>
+      <h3>月</h3>
+      <ul id="monthList"></ul>
+    </section>
+  </main>
+  <div id="jobPopup" hidden>
+    <div class="jobPopupCard">
+      <p class="jobPopupTitle">推論ちゅうなのだ</p>
+      <span class="spinner" aria-hidden="true"></span>
+      <p id="busyText">待機中</p>
+      <button type="button" id="busyStopBtn">止める</button>
+    </div>
+  </div>
+  <script src="/app.js"></script>
+</body>
+</html>

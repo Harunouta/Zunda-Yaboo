@@ -1,0 +1,360 @@
+:root {
+  color-scheme: dark;
+  --bg: #1e1e1e;
+  --fg: #d4d4d4;
+  --muted: #9d9d9d;
+  --line: #3c3c3c;
+  --accent: #4fc1ff;
+  font-family: "Segoe UI", "Hiragino Sans", sans-serif;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+}
+
+.top {
+  padding: 16px 20px 8px;
+  border-bottom: 1px solid var(--line);
+}
+
+h1 {
+  font-size: 20px;
+  margin: 0 0 6px;
+}
+
+h2 {
+  font-size: 16px;
+  margin: 0 0 10px;
+}
+
+h3 {
+  font-size: 13px;
+  margin: 16px 0 6px;
+  font-weight: 600;
+}
+
+.sub,
+.hint {
+  color: var(--muted);
+  font-size: 12px;
+  margin: 0 0 10px;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(260px, 340px) 1fr;
+  gap: 0;
+  min-height: calc(100vh - 72px);
+}
+
+.pane {
+  padding: 16px 20px 32px;
+}
+
+#launchPane {
+  border-right: 1px solid var(--line);
+}
+
+label {
+  display: block;
+  font-size: 12px;
+  margin: 8px 0;
+}
+
+input[type="text"],
+select {
+  display: block;
+  width: 100%;
+  margin-top: 4px;
+  background: #2d2d2d;
+  color: var(--fg);
+  border: 1px solid var(--line);
+  padding: 6px 8px;
+}
+
+.check {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+button {
+  margin-top: 8px;
+  background: var(--accent);
+  color: #111;
+  border: 0;
+  padding: 8px 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.runList {
+  max-height: 280px;
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  margin: 8px 0;
+}
+
+.runCard {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: #252526;
+  color: var(--fg);
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  margin: 0;
+  padding: 10px 12px;
+  font-weight: 400;
+}
+
+.runCard:hover {
+  background: #2d2d30;
+}
+
+.runCard.isOpen {
+  background: #0e3050;
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.runCard strong {
+  display: block;
+  font-size: 13px;
+}
+
+.runMeta {
+  float: right;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.runBits {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  margin-top: 4px;
+}
+
+.runActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0;
+}
+
+.filePick {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+}
+
+.filePick input {
+  width: auto;
+}
+
+.job {
+  white-space: pre-wrap;
+  font-size: 11px;
+  background: #111;
+  padding: 8px;
+  max-height: 220px;
+  overflow: auto;
+  border: 1px solid var(--line);
+}
+
+#eventLog {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px;
+  max-height: 240px;
+  overflow: auto;
+  border: 1px solid var(--line);
+}
+
+#eventLog li {
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--line);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+#eventLog li:hover {
+  background: #2a2a2a;
+}
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 420px;
+  overflow: auto;
+  border: 1px solid var(--line);
+}
+
+#monthList li {
+  border-bottom: 1px solid var(--line);
+  font-size: 12px;
+}
+
+#monthList li .monthRow {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 8px 10px;
+  background: transparent;
+  color: var(--fg);
+  font-weight: 400;
+  text-align: left;
+}
+
+#monthList li .monthRow:hover,
+#monthList li.open .monthRow {
+  background: #2a2a2a;
+}
+
+#monthList .monthExpand {
+  padding: 8px 10px 12px;
+  border-top: 1px solid var(--line);
+  background: #222;
+}
+
+dl {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 6px 10px;
+  font-size: 13px;
+}
+
+dt {
+  color: var(--muted);
+}
+
+dt .why {
+  color: var(--accent);
+  font-weight: 700;
+  cursor: help;
+}
+
+.hint code {
+  font-size: 11px;
+}
+
+canvas {
+  width: 100%;
+  max-width: 720px;
+  background: #252525;
+  border: 1px solid var(--line);
+  cursor: crosshair;
+}
+
+#eventLog li.yearHit {
+  background: #2a3a2a;
+  outline: 1px solid var(--accent);
+}
+
+body.jobRunning {
+  padding-bottom: 0;
+}
+
+#jobPopup {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding: 24px;
+  pointer-events: none;
+}
+
+#jobPopup[hidden] {
+  display: none;
+}
+
+.jobPopupCard {
+  pointer-events: auto;
+  width: min(360px, 92vw);
+  padding: 16px 18px;
+  background: #1a1a22;
+  border: 2px solid var(--accent);
+  border-radius: 16px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
+  animation: popIn 0.25s ease-out;
+}
+
+.jobPopupTitle {
+  margin: 0 0 8px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+#jobPopup .spinner {
+  margin-bottom: 8px;
+}
+
+#jobPopup button {
+  margin-top: 10px;
+}
+
+@keyframes popIn {
+  from {
+    transform: translateY(24px) scale(0.92);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+.opinion {
+  margin-top: 8px;
+  font-size: 13px;
+  padding: 8px;
+  border: 1px solid var(--line);
+}
+
+.recap {
+  white-space: pre-wrap;
+  font-size: 13px;
+  line-height: 1.55;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  background: #222;
+  max-height: 480px;
+  overflow: auto;
+}
+  margin: 8px 0;
+  padding: 8px;
+  border: 1px solid var(--line);
+  font-size: 12px;
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  border: 2px solid #444;
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+#busyText {
+  margin: 0;
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

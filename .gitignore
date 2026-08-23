@@ -1,0 +1,55 @@
+# Zunda-Yaboo
+
+## Ignore run artifacts & secrets
+logs/
+checkpoints/
+*.ckpt.json
+.env
+.env.*
+!.env.example
+
+## Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+
+## Restricted / local-only data & models
+data/restricted/*
+!data/restricted/README.md
+!data/restricted/.gitignore
+data/raw/**
+!data/raw/**/README.md
+data/processed/**
+!data/processed/**/README.md
+# Legacy paths if recreated at data root
+data/zundamon_bible.jsonl
+data/ankomon_bible.txt
+
+## Local model mounts (never commit weights)
+models/
+*.gguf
+*.bin
+*.safetensors
+
+## Local agent / Cursor instruction files (keep on disk, do not publish)
+HANDOFF.md
+COMPLETION_PLAN.md
+DATA_INGEST_PLAN.md
+OVERNIGHT_A.md
+OVERNIGHT_B.md
+OVERNIGHT_C.md
+docs/CUI_AND_VIZ.md
+.cursor/
+
+## OS / IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+## Docker leftover
+*.tar

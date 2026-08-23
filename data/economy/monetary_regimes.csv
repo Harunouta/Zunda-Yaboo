@@ -1,0 +1,4 @@
+fromMonth,toMonth,standard,evidence,institutionNote
+1603-01,1897-09,edo_metal,real_dates_inferred_physics,Edo bakufu gold/silver/rice/hansatsu through Meiji yen (1871) until Gold Standard Law
+1897-10,1949-03,gold_yen,real_dates_inferred_physics,Gold Standard Law 1897-10; 1917 embargo and 1931 exit are still gold_yen physics with weaker peg
+1949-04,2026-08,dollar,real_dates_inferred_physics,Dodge Line 360 JPY/USD then Nixon/Smithsonian/float; FX from fx_jpy_per_usd.csv

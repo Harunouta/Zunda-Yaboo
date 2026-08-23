@@ -1,0 +1,20 @@
+# Zunda-Yaboo monthly simulation defaults
+# Full span: Edo bakufu founding -> 2026-08 (monthly turns)
+standard: zunda  # zunda | anko | azuki | edo_metal | dollar
+start: "1603-01"
+end: "2026-08"
+seed: 42
+useLlm: true
+checkpointEveryMonths: 1
+
+lmStudio:
+  host: host.docker.internal
+  port: 1234
+  rulerModel: qwen3.6-27b
+  crowdModel: google/gemma-4-e4b
+  timeoutSec: 180
+
+paths:
+  logsDir: logs
+  checkpointsDir: checkpoints
+  modelsDir: /models  # mounted from D:\Zunda-AI (host)

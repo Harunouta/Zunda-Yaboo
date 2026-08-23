@@ -1,0 +1,421 @@
+# World-scoped shocks that can reach Japan's node (trade, metals, sugar, oil, rumor).
+# Sparse by design — NOT a full world history timeline. See ../README.md
+# Japan domestic history: user edits japan/* ; keep overlap intentional only when useful.
+
+# --- 17c: silver / East Asian order / VOC ---
+potosi_silver_wave:
+  scope: world
+  promptForLeader: 新大陸ポトシ銀がアジア市へ流れ、銀建ての交易条件が揺れているとの遠報。国内の銀・藩札の扱いを見直せ。
+  promptForOpinionLeader: 南蛮の銀が安い、と長崎で囁く行商がいる。
+  worldEffect: gold_outflow
+  notes: 17c Asian silver glut proxy (sparse)
+
+manchu_beijing_fall:
+  scope: world
+  promptForLeader: 明が倒れ清が北京を押さえたとの大陸報。東アジア秩序の転換をどう読む？
+  promptForOpinionLeader: 唐土の王が変わった、と唐人・オランダ情報が飛ぶ。
+
+zheng_taiwan_expulsion:
+  scope: world
+  promptForLeader: 台湾からオランダが追い出されたとの報。南洋航路と砂糖・鹿皮交易が乱れる恐れ。
+  promptForOpinionLeader: 台湾の港が静かになった、と舟乗りが噂する。
+  worldEffect: sugar_spike
+
+treaty_nerchinsk:
+  scope: world
+  promptForLeader: 清とロシアがネルチンスクで境界を定めたとの報。北方交易と鉄砲・毛皮の噂が動く。
+  promptForOpinionLeader: 北の異国が唐土と手を結んだ、と恐れる者もいる。
+
+thirty_years_war_peak:
+  scope: world
+  promptForLeader: 欧州の三十年戦争が長期化し、傭兵と物資が大西洋交易を圧迫しているとの報。
+  promptForOpinionLeader: 遠国で戦争が終わらない、船が少ない、と港で聞く。
+  worldEffect: sugar_spike
+
+tulip_mania_burst:
+  scope: world
+  promptForLeader: オランダでチューリップ投機が破裂したとの奇報。信用と為替の噂が東インド会社経由で届く。
+  promptForOpinionLeader: 花の球根で破産した国がある、と笑う噂。
+
+anglo_dutch_war:
+  scope: world
+  promptForLeader: 英蘭戦争で北海・アジア航路が戦場化。オランダ経由の長崎物資が滞る恐れ。
+  promptForOpinionLeader: 紅毛の船が遅れる、戦争だ、と噂。
+  worldEffect: sugar_spike
+
+franco_dutch_war:
+  scope: world
+  promptForLeader: 仏蘭戦争でオランダ本国が圧迫され、VOC航路と為替が揺れている。
+  promptForOpinionLeader: オランダが攻められている、唐船も減る、と不安が広がる。
+  worldEffect: sugar_spike
+
+spanish_succession_war:
+  scope: world
+  promptForLeader: スペイン継承戦争で欧州と植民地の覇権が揺れている。銀と砂糖の流れに注意せよ。
+  promptForOpinionLeader: 王の跡目争いで海が荒れる、と南蛮話。
+  worldEffect: gold_outflow
+
+treaty_utrecht:
+  scope: world
+  promptForLeader: ユトレヒト条約で継承戦争が収束。植民地と奴隷・砂糖交易の枠組みが変わるとの報。
+  promptForOpinionLeader: 戦争が終わった、南蛮の地図がまた変わった、と噂。
+  worldEffect: sugar_spike
+
+american_independence:
+  scope: world
+  promptForLeader: 英領アメリカが独立を宣言したとの報。大西洋交易と将来の太平洋進出の種を読め。
+  promptForOpinionLeader: 新しい国が生まれた、イギリスが負けた、と驚く。
+
+spanish_american_war:
+  scope: world
+  promptForLeader: 米西戦争でフィリピンが戦場・占領へ。東アジアの米軍プレゼンスが急変する。
+  promptForOpinionLeader: アメリカが南の島を取った、次は日本か、と怯える者も。
+  worldEffect: gold_outflow
+
+vietnam_escalation:
+  scope: world
+  promptForLeader: ベトナム戦争が拡大し、アジアの軍事需要とドル・資源が動いている。特需とインフレの両面を見よ。
+  promptForOpinionLeader: 南の戦争で仕事が増える、若者は恐れる、と噂が割れる。
+  worldEffect: oil_spike
+
+nixon_shock:
+  scope: world
+  promptForLeader: ニクソン・ショックでドルと金の兌換が停止。ブレトンウッズ後の為替が宙に浮く。
+  promptForOpinionLeader: ドルの約束が壊れた、お金の意味が分からない、と騒ぐ。
+  worldEffect: gold_outflow
+
+# --- 18c: Atlantic finance / sugar / war ---
+south_sea_bubble:
+  scope: world
+  promptForLeader: 欧州で南海会社の投機が破裂したとの報。遠方だが信用と為替の噂が港に届く。
+  promptForOpinionLeader: 南蛮の紙の会社が潰れた、と笑う者、恐れる者がいる。
+
+seven_years_war:
+  scope: world
+  promptForLeader: 欧州列強の七年戦争が植民地交易を揺さぶっている。輸入品と運賃の高騰に備えよ。
+  promptForOpinionLeader: 遠国の戦争で船が遅れる、と市で噂。
+  worldEffect: sugar_spike
+
+treaty_paris_1763:
+  scope: world
+  promptForLeader: パリ条約で七年戦争が終わり、植民地の地図が塗り替わった。交易ルートの再編を読め。
+  promptForOpinionLeader: 戦争が終わったが、どの国の船が来るか分からない、と噂。
+
+austrian_succession_war:
+  scope: world
+  promptForLeader: オーストリア継承戦争で欧州が再び戦場化。運賃と傭兵需要が物価を押すとの報。
+  promptForOpinionLeader: また王の戦争だ、南蛮物が高い、と嘆く。
+  worldEffect: sugar_spike
+
+haitian_revolution_sugar:
+  scope: world
+  promptForLeader: カリブの奴隷反乱でサトウキビが止まるとの報。世界砂糖が急騰する。備蓄と甘味の配分を決めよ。
+  promptForOpinionLeader: 砂糖が消える、と菓子屋と行商が慌てる。
+  worldEffect: sugar_spike
+
+napoleonic_blockade:
+  scope: world
+  promptForLeader: ナポレオンの大陸封鎖で大西洋交易が歪む。中立船と長崎ルートの物資をどう確保する？
+  promptForOpinionLeader: 南蛮の船が来ない月がある、と港で囁く。
+  worldEffect: sugar_spike
+
+# --- early 19c: silver, opium, gold ---
+latin_silver_disruption:
+  scope: world
+  promptForLeader: ラテンアメリカ独立戦争で銀産出・輸送が乱れている。東アジアの銀建決済が不安定だ。
+  promptForOpinionLeader: 銀貨の相場がおかしい、と両替商が眉をひそめる。
+  worldEffect: gold_outflow
+
+greek_independence_grain:
+  scope: world
+  promptForLeader: ギリシャ独立戦争で東地中海の穀物・海運が乱れている。遠方だが運賃と食料市況の余波に注意。
+  promptForOpinionLeader: 遠い海で戦争、麦が高い国がある、と噂。
+  cropLossExtra: 0.015
+
+first_opium_war:
+  scope: world
+  promptForLeader: 清とイギリスがアヘンをめぐり戦っている。中国貿易・銀・茶の流れが日本にも波及しうる。
+  promptForOpinionLeader: 唐土で異国と戦争、銀が消える、と長崎から噂が来る。
+  worldEffect: gold_outflow
+
+irish_famine_grain:
+  scope: world
+  promptForLeader: アイルランド大飢饉で穀物・移民・運賃が乱高下している。世界食料市況に注意せよ。
+  promptForOpinionLeader: 遠国で芋が腐り人が逃げている、と怪談めいた噂。
+  cropLossExtra: 0.02
+
+british_slavery_abolition_sugar:
+  scope: world
+  promptForLeader: 英帝国で奴隷制廃止が進み、砂糖プランテーションコストが跳ねている。甘味相場の再編を見よ。
+  promptForOpinionLeader: 南蛮砂糖の仕組みが変わった、高くなる、と噂。
+  worldEffect: sugar_spike
+
+california_gold_rush:
+  scope: world
+  promptForLeader: カリフォルニアで金が出たと世界が沸く。金銀比価と太平洋航路の人流が動く。
+  promptForOpinionLeader: 金の山がある国へ人が走る、と港で聞く。
+  worldEffect: gold_outflow
+
+second_opium_war:
+  scope: world
+  promptForLeader: 再度のアヘン戦争で清の港が開かされつつある。東アジアの関税・銀・宣教師の動きが加速する。
+  promptForOpinionLeader: 唐土の港がもっと開く、と恐れと好奇が混ざる。
+  worldEffect: gold_outflow
+
+atlantic_sugar_crisis:
+  scope: world
+  promptForLeader: 大西洋砂糖市況が急変し、甘味と運賃が乱れている。国内砂糖在庫を点検せよ。
+  promptForOpinionLeader: 南蛮砂糖が急に高い、と菓子の話が増える。
+  worldEffect: sugar_spike
+
+suez_canal_open:
+  scope: world
+  promptForLeader: スエズ運河が開通し、欧亜航路が短縮された。運賃・情報速度・輸出入の前提が変わる。
+  promptForOpinionLeader: 海が短くなった、と奇妙な噂が町を走る。
+
+us_civil_war_cotton:
+  scope: world
+  promptForLeader: アメリカ内戦で綿花が止まり、繊維と運賃が世界で暴れている。代替輸入と物価を見よ。
+  promptForOpinionLeader: 木綿が高い、遠国の戦争のせいだ、と織物屋が嘆く。
+  worldEffect: sugar_spike
+
+long_depression_1873:
+  scope: world
+  promptForLeader: 欧米で恐慌（1873）が広がり、銀・国債・貿易が収縮している。日本の対外決済に備えよ。
+  promptForOpinionLeader: 異国の会社が潰れている、金が動かない、と噂。
+  worldEffect: gold_outflow
+
+# --- late 19c / fin de siècle ---
+scramble_africa_berlin:
+  scope: world
+  promptForLeader: ベルリン会議以降、列強の植民地分割が加速。資源と航路の独占競争が東洋にも影を落とす。
+  promptForOpinionLeader: 地図の色が塗り替えられる、と新聞好きが言う。
+
+egypt_suez_occupation:
+  scope: world
+  promptForLeader: イギリスがエジプトを事実上掌握し、スエズ航路の支配が強まった。運賃と地中海〜アジア物流を再評価せよ。
+  promptForOpinionLeader: 運河の国をイギリスが取った、と港で噂。
+  worldEffect: sugar_spike
+
+boxer_rebellion:
+  scope: world
+  promptForLeader: 清で義和団の乱。列強が出兵し、北清の市況と銀が乱れる。在留民と交易リスクを評価せよ。
+  promptForOpinionLeader: 唐土で外国人を追う騒ぎ、戦争になるかも、と恐れる。
+  worldEffect: gold_outflow
+
+# --- early 20c ---
+panama_canal_open:
+  scope: world
+  promptForLeader: パナマ運河が開通。太平洋〜大西洋の物流が再編される。運賃と戦略物資の見通しを更新せよ。
+  promptForOpinionLeader: アメリカが海を掘った、船が早くなる、と噂。
+
+russian_revolution:
+  scope: world
+  promptForLeader: ロシア革命で帝政が倒れ、戦債・穀物・極東情勢が不透明だ。対露債権と北方警備を点検せよ。
+  promptForOpinionLeader: ロシアの王がいなくなった、赤い旗の話が怖い。
+
+versailles_order:
+  scope: world
+  promptForLeader: ヴェルサイユ体制で戦後秩序と賠償が決まった。欧州需要と為替の前提が変わる。
+  promptForOpinionLeader: 戦争が公式に終わった、ドイツが払う、と新聞話。
+
+spanish_flu_wave:
+  scope: world
+  promptForLeader: 世界的な流感（スペイン風邪）が広がっている。人流制限と労働力・食料物流を守れ。
+  promptForOpinionLeader: 咳で倒れる噂。祭りが静かになる。
+  epidemicSeverity: 0.35
+  populationShock: 0.004
+
+wall_street_crash:
+  scope: world
+  promptForLeader: ニューヨーク株式が大暴落。世界信用が収縮する。金・輸出・失業の連鎖に備えよ。
+  promptForOpinionLeader: アメリカの株が死んだ、仕事がなくなる、と怯える。
+  worldEffect: gold_outflow
+
+german_hyperinflation_echo:
+  scope: world
+  promptForLeader: ドイツでハイパーインフレが進行し、欧州の紙通貨信用が揺れている。為替と国債の伝染に注意。
+  promptForOpinionLeader: 紙切れの国がある、金が本物だ、と恐れる。
+  worldEffect: hyperinflation
+
+sterling_crisis_1931:
+  scope: world
+  promptForLeader: イギリスが金本位を離脱し、ポンドが揺れている。基軸通貨の不安が東洋の決済にも及ぶ。
+  promptForOpinionLeader: イギリスの金が終わった、円も危ない、と噂。
+  worldEffect: gold_outflow
+
+# --- mid 20c ---
+ww2_europe_start:
+  scope: world
+  promptForLeader: 欧州で大戦が再燃。海上封鎖と資源争奪が始まった。戦略物資と為替を防衛せよ。
+  promptForOpinionLeader: また西洋が戦争だ。船が危ない、と港がざわつく。
+  worldEffect: oil_spike
+
+bretton_woods:
+  scope: world
+  promptForLeader: ブレトンウッズで戦後通貨秩序の骨格が決まった。ドル・金・固定相場の時代を見据えよ。
+  promptForOpinionLeader: ドルが世界の金になる、と難しい話が新聞に出る。
+
+marshall_plan:
+  scope: world
+  promptForLeader: 欧州復興援助（マーシャル・プラン）が動き、ドルと物資が大西洋を渡る。日本の占領経済との差を意識せよ。
+  promptForOpinionLeader: アメリカが欧州に金を配る、日本は？と噂。
+
+suez_crisis:
+  scope: world
+  promptForLeader: スエズ危機で運河が事実上止まり、石油と運賃が跳ねた。エネルギーと海運コストを抑えよ。
+  promptForOpinionLeader: 運河が閉じて灯油が高い、と怒る。
+  worldEffect: oil_spike
+
+opec_embargo:
+  scope: world
+  promptForLeader: OPECが禁輸・減産で原油を武器化した。産業と物価の同時ショックに対処せよ。
+  promptForOpinionLeader: 油が来ない。行列と買い占めの噂。
+  worldEffect: oil_spike
+
+iranian_revolution_oil:
+  scope: world
+  promptForLeader: イラン革命で再び原油供給が揺らいだ。第二次オイルショック級の備えを取れ。
+  promptForOpinionLeader: また油が高い。節約と闇の話が増える。
+  worldEffect: oil_spike
+
+# --- late 20c / 21c ---
+black_monday_1987:
+  scope: world
+  promptForLeader: 世界同時株安（ブラックマンデー）。金融市場の連鎖下落を監視し、信用収縮を防げ。
+  promptForOpinionLeader: 株が世界で落ちた、ボーナスが消えるかも。
+  worldEffect: gold_outflow
+
+plaza_accord_echo:
+  scope: world
+  promptForLeader: プラザ合意でドル高是正が進む。円高・輸出産業・資本フローの前提が変わる（世界側ショック）。
+  promptForOpinionLeader: ドルが安くなる、輸出が苦しい、と工場の噂。
+  worldEffect: gold_outflow
+
+soviet_collapse:
+  scope: world
+  promptForLeader: ソ連が解体へ向かう。冷戦後の資源・援助・安全保障の前提が変わる。
+  promptForOpinionLeader: 赤い帝国が終わる、平和か混乱か、と噂が割れる。
+
+asian_financial_crisis:
+  scope: world
+  promptForLeader: アジア通貨危機。隣国の為替・銀行が連鎖破綻している。邦銀と輸出の急ブレーキに備えよ。
+  promptForOpinionLeader: タイや韓国が大変だ。円も危ない？と怯える。
+  worldEffect: gold_outflow
+
+dotcom_bust:
+  scope: world
+  promptForLeader: ITバブル崩壊。世界の株と設備投資が縮む。輸出需要の冷え込みを見込め。
+  promptForOpinionLeader: ネット会社が潰れる、景気が悪い、と若い衆が嘆く。
+
+lehman_shock:
+  scope: world
+  promptForLeader: リーマン破綻で世界金融が凍結。輸出・雇用・信用の崖をどう繋ぐ？
+  promptForOpinionLeader: アメリカの銀行が死んだ。派遣切りの噂が怖い。
+  worldEffect: gold_outflow
+
+arab_spring_brent:
+  scope: world
+  promptForLeader: 中東・北アフリカの政変でブレント原油が乱高下。エネルギー安全保障を再点検せよ。
+  promptForOpinionLeader: 遠い国の騒ぎでガソリンが上がる、と怒る。
+  worldEffect: oil_spike
+
+covid_wuhan_alert:
+  scope: world
+  promptForLeader: 中国武漢で未知の肺炎が広がるとの国際警報。人流・サプライチェーンの初期対応を決めよ。
+  promptForOpinionLeader: 大陸で怖い病気、船と飛行機が危ない、と噂が先走る。
+  epidemicSeverity: 0.2
+  populationShock: 0.001
+
+ukraine_war_energy:
+  scope: world
+  promptForLeader: ロシアのウクライナ侵攻でエネルギー・穀物・制裁が同時に動く。物価と備蓄を守れ。
+  promptForOpinionLeader: 戦争で小麦とガスが高い、世界が狭い、と嘆く。
+  worldEffect: oil_spike
+  cropLossExtra: 0.03
+
+# --- 2020s post-COVID → 2026-08 ---
+covid_lockdown_chain:
+  scope: world
+  promptForLeader: 世界的ロックダウンで港湾・工場が同時に止まる。サプライチェーンと在庫を防衛せよ。
+  promptForOpinionLeader: 世界が閉まる。物が届かない、と怯える。
+  epidemicSeverity: 0.15
+  cropLossExtra: 0.02
+
+chip_shortage_2021:
+  scope: world
+  promptForLeader: 自動車・家電向け半導体が世界で足りない。電子部品と設備投資のボトルネックに備えよ。
+  promptForOpinionLeader: 車もゲーム機も遅れる。チップがない、と工場の噂。
+  worldEffect: chip_spike
+
+europe_gas_crunch:
+  scope: world
+  promptForLeader: 欧州のガス逼迫がLNG争奪を起こし、アジアのエネルギー価格も押し上げている。
+  promptForOpinionLeader: ガスが高い国がある。電気代が上がる、と怒る。
+  worldEffect: oil_spike
+
+chatgpt_chip_boom:
+  scope: world
+  promptForLeader: 生成AI（ChatGPT級）ブームでGPU・先端半導体需要が急騰。調達競争と価格高騰に備えよ。
+  promptForOpinionLeader: AIが流行ってチップが高い。パソコンも高い、と嘆く。
+  worldEffect: chip_spike
+
+svb_banking_scare:
+  scope: world
+  promptForLeader: 米地銀破綻連鎖の恐れで金融ストレスが広がる。信用収縮とドル流動性を監視せよ。
+  promptForOpinionLeader: また銀行が危ない。預金が怖い、と囁く。
+  worldEffect: gold_outflow
+
+israel_gaza_war:
+  scope: world
+  promptForLeader: 中東で大規模戦闘が始まり、原油・保険・航路リスクが跳ねた。エネルギー備蓄を点検せよ。
+  promptForOpinionLeader: 中東が燃えている。ガソリンが上がる、と恐れる。
+  worldEffect: oil_spike
+
+red_sea_shipping:
+  scope: world
+  promptForLeader: 紅海・スエズ周辺の攻撃でコンテナが迂回し、運賃と納期が崩れている。輸入物価を抑えよ。
+  promptForOpinionLeader: 船が遠回りする。荷物が遅いし高い、と店が困る。
+  worldEffect: oil_spike
+
+iran_israel_strike:
+  scope: world
+  promptForLeader: イラン・イスラエル間の直接攻撃でホルムズ情勢が緊迫。原油とナフサ系原料の供給不安が広がる。
+  promptForOpinionLeader: 海峡が危ない。油と化学原料が足りないかも、と噂。
+  worldEffect: oil_spike
+
+us_election_trade_2024:
+  scope: world
+  promptForLeader: 米大統領選後の関税・同盟・ハイテク規制の不確実性が増した。輸出入と半導体規制を再点検せよ。
+  promptForOpinionLeader: アメリカの政治で貿易が変わる、と新聞が騒ぐ。
+  worldEffect: gold_outflow
+
+ai_capex_chip_2025:
+  scope: world
+  promptForLeader: 生成AI投資競争が続き、先端半導体と電力・冷却機材が世界で奪い合いになっている。
+  promptForOpinionLeader: AI会社がチップを買い占める。一般の機械が後回し、と工場が嘆く。
+  worldEffect: chip_spike
+
+middle_east_naphtha_squeeze:
+  scope: world
+  promptForLeader: 中東情勢の悪化で原油に加えナフサ・石化原料が逼迫。化学・樹脂・輸送コストの連鎖に備えよ。
+  promptForOpinionLeader: ナフサが足りない。プラスチックも高い、と困る。
+  worldEffect: oil_spike
+
+chip_export_controls_2026:
+  scope: world
+  promptForLeader: 先端半導体の輸出規制が再強化され、装置・部材の迂回調達コストが上昇している。
+  promptForOpinionLeader: チップの輸出が止められる。日本の工場も影響？と不安。
+  worldEffect: chip_spike
+
+strait_energy_scare_2026:
+  scope: world
+  promptForLeader: 2026年、ホルムズ／紅海周辺の緊張でエネルギーとナフサのスポットが再び跳ねた。夏場の備蓄を守れ。
+  promptForOpinionLeader: また油が高い夏だ。冷房代が怖い、と嘆く。
+  worldEffect: oil_spike
+
+sim_horizon_2026_08:
+  scope: world
+  promptForLeader: 2026年8月。生成AI需要と中東エネルギー不安が並存する世界市況の下で、期末の物価・備蓄・為替を締めよ。
+  promptForOpinionLeader: まだAIと油の話ばかり。先が高い、とぼやく。
+  notes: Soft end-marker for sim horizon 2026-08

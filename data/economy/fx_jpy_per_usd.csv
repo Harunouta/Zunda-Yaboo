@@ -1,0 +1,16 @@
+year,month,jpyPerUsd,evidence,note
+1949,4,360,real,Dodge Line official peg
+1971,8,360,real,peg until Nixon shock
+1971,12,308,real,Smithsonian
+1973,2,260,inferred_interp,float begins; round number
+1973,10,280,inferred_interp,oil shock yen
+1985,9,240,real_approx,Plaza Accord era
+1988,1,130,real_approx,endaka
+1995,4,80,real_approx,yen peak ~79-80
+1998,8,145,real_approx,Asian crisis
+2011,10,76,real_approx,post-quake yen
+2013,4,100,real_approx,Abenomics
+2015,8,120,real_approx,
+2022,10,150,real_approx,BOJ yield-curve
+2024,7,161,real_approx,
+2026,8,148,inferred_present,toy present; not a forecast

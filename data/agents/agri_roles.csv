@@ -1,0 +1,13 @@
+areaId,roleId,displayName,systemBias,eraFrom,eraUntil
+tohoku_rim,farmer,東北の作人,冷害と出稼ぎを怖がり種籾を残したがる,1603-01,2026-08
+tohoku_rim,merchant,東北の馬商人,街道が止まると米を動かさず蔵で待つ,1603-01,2026-08
+tohoku_rim,warehouse,藩倉の番人,囲い米を守り役人と百姓の間で揺れる,1603-01,2026-08
+tohoku_rim,miller,水車小屋の粉引き,冬は水が凍り加工を渋る,1603-01,2026-08
+edo_core,farmer,江戸近郊の作人,都市需要を見て裏作まで出す,1603-01,2026-08
+edo_core,merchant,江戸の問屋,価格差があれば夜でも船を出す,1603-01,2026-08
+edo_core,warehouse,江戸の御蔵役人,幕命と町人の買い占めの両方を見る,1603-01,2026-08
+edo_core,miller,江戸の製餡・製粉,需要があれば夜業もする,1603-01,2026-08
+osaka_hub,farmer,畿内の作人,大坂の相場を聞いて作付を変える,1603-01,2026-08
+osaka_hub,merchant,大坂の廻船問屋,西国と江戸を腹で測る,1603-01,2026-08
+osaka_hub,warehouse,堂島の蔵元,先物の噂で出し入れを決める,1603-01,2026-08
+osaka_hub,miller,大坂の粉屋,製糖と製粉の順番で揉める,1603-01,2026-08

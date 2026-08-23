@@ -1,0 +1,13 @@
+path,evidence,whatIsReal,whatIsInferred
+data/economy/monetary_regimes.csv,mixed,Switch months 1897-10 Gold Standard Law; 1949-04 Dodge Line,How metal/gold/dollar physics map onto those dates
+data/economy/fx_jpy_per_usd.csv,mixed,Official 360 peg 1949-1971 and well-known later market levels,Monthly interpolation between anchors; 2026-08 is a toy present
+data/events/policies/kit_classes.csv,inferred,None,All harvest/mint/spoil kit deltas are sim knobs
+data/agents/agri_roles.csv,inferred,Area names match founding nodes,Personas and biases are fiction for LLM
+data/agents/crop_calendar.csv,inferred,Winter is slack in Tohoku as a climate cartoon,Labor indices are not MAFF/JMA series
+data/agents/logistics_routes.csv,mixed,Rail 1872-10 Tokaido; 1891 Tohoku line; 1964-10 Tokaido Shinkansen; 1982 Tohoku Shinkansen; 1969 Tomei/Meishin,baseCost and capacityRatio
+data/early_modern/rice_price_index.csv,real_yield_inverse,1883-2022 Figshare national rice yield inverse (CC BY 4.0),Not Osaka/Edo market quotes; 2023-26 has no rows
+data/early_modern/rice_yield_scarcity_index.csv,real_yield_inverse,Same BD series as rice_price_index.csv,Alias filename
+data/early_modern/rice_price_index_sim_fill_1603_1882.csv,inferred,None,Sim ricePrice scaled fill — not loaded by the engine
+data/events/japan/timeline.csv,mixed,Imported event months from user xlsx/Wikipedia summaries,Coefficients filled by import scripts
+data/events/world/timeline.csv,mixed,Sparse world shock dates,Toy worldEffect mapping
+data/processed/climate_monthly.csv,mixed,Kyoto cherry / JCDP / Suwa where ingested,Procedural climate elsewhere
