@@ -12,7 +12,12 @@ GUIなし。通貨制度は CLI の `--standard`（ラジオ相当）で選択�
 - 飢饉・洪水・疫病・戦争などの出来事の説明は、Wikipedia 等の二次情報と LLM の推論を混ぜたものです。**事実と一致するかは検証していません。** 史実と一致するように設計してもいません。
 - ずんだもん／あんこもんの詳細コーパス（聖書）はこのリポジトリでは**非公開**です。無くても短いフォールバックで動きます。
 
-見て遊ぶは [`VIEWING.md`](VIEWING.md)。
+見て遊ぶ:
+
+- **ブラウザ** … `open_viewer.bat` → `http://127.0.0.1:8765/`（月次画面・短い起動）
+- **CUI** … ターミナルで `python scripts/operator_cui.py` または `python scripts/play_run.py --preset …`
+
+手順の本体は [`VIEWING.md`](VIEWING.md)。
 
 - 日本史イベント（飢饉〜火事・争い・政策・法令カタログ）→ [`data/events/README.md`](data/events/README.md)
 - Excel 仕様 → [`data/events/UNIFIED_EVENTS_SPEC.md`](data/events/UNIFIED_EVENTS_SPEC.md)
@@ -91,16 +96,16 @@ Excel からの再取込はユーザーの手元の xlsx を `--xlsx` で渡す�
 
 ## 前提
 
-- 作業ディレクトリ（ホスト）: `D:\Zunda-Yaboo` → コンテナ `/workspace`
-- 追加 SLM 置き場: `D:\Zunda-AI` → コンテナ `/models`
+- 作業ディレクトリ: クローンしたリポジトリ直下（コンテナでは `/workspace`）
+- 追加 SLM 置き場: コンテナ `/models`（ホスト側パスは `ZUNDA_AI_HOST` または `ZUNDA_AI_DIR` で指定。既定のドライブ文字は持たない）
 - LLM: ホストの LM Studio（統治 Qwen3.6-27B ＋ crowd Qwen2.5-7B）
 - 遅い実行OK。チェックポイント `checkpoints/latest.json` で再開可能
 
 ## コンテナ（開発用 Zunda-Yaboo）
 
-既に recreate 済み:
+コンテナ名 `Zunda-Yaboo` を使う想定です。
 
-- マウント: `D:\Zunda-Yaboo:/workspace`, `D:\Zunda-AI:/models`
+- マウント例: リポジトリ → `/workspace`、モデルディレクトリ → `/models`
 - `host.docker.internal` → LM Studio
 
 ```powershell

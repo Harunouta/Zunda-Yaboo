@@ -19,8 +19,8 @@
 ## 使い方
 
 ```powershell
-cd D:\Zunda-Yaboo
-$env:PYTHONPATH = "D:\Zunda-Yaboo"
+cd <repo root>
+$env:PYTHONPATH = (Get-Location).Path
 
 python scripts/export_purchasing_power.py --log logs/runs/zunda_full_1603_2026.jsonl
 python scripts/analyze_run.py --log logs/runs/zunda_full_1603_2026.jsonl

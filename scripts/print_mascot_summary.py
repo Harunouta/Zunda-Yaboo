@@ -1,10 +1,16 @@
+"""Summarize mascot smoke JSONL next to the repo logs folder."""
+
+from __future__ import annotations
+
 import json
 from pathlib import Path
 
-out = Path(r"D:\Zunda-Yaboo\logs\mascot_smoke_summary.txt")
+root = Path(__file__).resolve().parents[1]
+out = root / "logs" / "mascot_smoke_summary.txt"
+src = root / "logs" / "llm_smoke_mascot.jsonl"
 rows = [
   json.loads(line)
-  for line in Path(r"D:\Zunda-Yaboo\logs\llm_smoke_mascot.jsonl").read_text(encoding="utf-8").splitlines()
+  for line in src.read_text(encoding="utf-8").splitlines()
   if line.strip()
 ]
 lines = []

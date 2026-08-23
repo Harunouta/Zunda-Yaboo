@@ -13,7 +13,7 @@ services:
     volumes:
       - ./logs:/workspace/logs
       - ./checkpoints:/workspace/checkpoints
-      - ${ZUNDA_AI_HOST:-D:/Zunda-AI}:/models
+      - ${ZUNDA_AI_HOST:-./models}:/models
     ports:
       - "8080:80"
     command:

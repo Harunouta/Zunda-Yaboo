@@ -3,11 +3,12 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 EMBED = ROOT / "logs" / "canvas_ppp_embed_preview.json"
-OUT = Path(r"C:\Users\eimia\.cursor\projects\d-Zunda-Yaboo\canvases\zunda-purchasing-power.canvas.tsx")
+OUT = Path(os.environ.get("CURSOR_CANVAS_DIR", str(ROOT / "logs" / "canvas_out"))) / "zunda-purchasing-power.canvas.tsx"
 
 
 def main() -> None:

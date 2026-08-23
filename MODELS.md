@@ -1,6 +1,6 @@
 # Local SLM / model cache
 
-Host path: `D:\Zunda-AI`  
+Host path: set `ZUNDA_AI_HOST` or `ZUNDA_AI_DIR` (container mount is `/models`). Do not hard-code a drive letter.  
 Container mount: `/models` (`ZUNDA_AI_DIR`)
 
 **Do not commit weights to GitHub.** See [REDISTRIBUTION.md](REDISTRIBUTION.md).

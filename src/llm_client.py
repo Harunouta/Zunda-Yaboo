@@ -16,7 +16,9 @@ RULER_MODEL = os.getenv("RULER_MODEL", "qwen3.6-27b")
 CROWD_MODEL = os.getenv("CROWD_MODEL", "qwen2.5-7b-instruct")
 # Optional second crowd model (LM Studio id). Tried after CROWD_MODEL fails JSON/empty.
 CROWD_FALLBACK_MODEL = os.getenv("CROWD_FALLBACK_MODEL", "google/gemma-4-e4b").strip()
-ZUNDA_AI_DIR = os.getenv("ZUNDA_AI_DIR", r"D:\Zunda-AI")
+ZUNDA_AI_DIR = os.getenv("ZUNDA_AI_DIR", "").strip() or (
+  "/models" if os.path.isdir("/models") else ""
+)
 DEFAULT_TIMEOUT = int(os.getenv("LM_TIMEOUT_SEC", "90"))
 DEFAULT_MAX_TOKENS = int(os.getenv("LM_MAX_TOKENS", "512"))
 CROWD_MAX_TOKENS = int(os.getenv("LM_CROWD_MAX_TOKENS", "768"))

@@ -3,11 +3,12 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 EMBED = ROOT / "logs" / "canvas_embed_historical_1603_2026.json"
-CANVAS_DIR = Path(r"C:\Users\eimia\.cursor\projects\d-Zunda-Yaboo\canvases")
+CANVAS_DIR = Path(os.environ.get("CURSOR_CANVAS_DIR", str(ROOT / "logs" / "canvas_out")))
 
 
 def js(value: object) -> str:

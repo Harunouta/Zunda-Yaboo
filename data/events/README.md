@@ -73,8 +73,8 @@ yearMonth,eventId,scope,notes
 ### 3. 確認
 
 ```powershell
-cd D:\Zunda-Yaboo
-$env:PYTHONPATH = "D:\Zunda-Yaboo"
+cd <repo root>
+$env:PYTHONPATH = (Get-Location).Path
 python scripts/validate_events.py
 python -c "from src.events import getEventsForMonth, reloadEventData; reloadEventData(); print(getEventsForMonth('1852-07'))"
 ```

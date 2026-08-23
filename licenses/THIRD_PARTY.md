@@ -23,7 +23,7 @@ Original Zunda-Yaboo code is under MIT (`../LICENSE`). Restricted data is not sh
 | LM Studio | NO | Proprietary app on host |
 | Cursor | NO | Dev environment |
 
-## Optional local model weights (`D:\Zunda-AI` / `/models`)
+## Optional local model weights (`/models` or `ZUNDA_AI_DIR`)
 
 | Example | Redistribute in git? | Notes |
 |---------|----------------------|-------|

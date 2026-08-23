@@ -17,4 +17,4 @@ lmStudio:
 paths:
   logsDir: logs
   checkpointsDir: checkpoints
-  modelsDir: /models  # mounted from D:\Zunda-AI (host)
+  modelsDir: /models  # host path via ZUNDA_AI_HOST / volume mount

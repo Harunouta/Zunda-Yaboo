@@ -39,7 +39,7 @@ synthetic anchors in `src/historical_track.py` are original abstractions for the
 | Path / item | Why |
 |-------------|-----|
 | `data/restricted/**` (except README) | Character bibles / third-party persona corpora |
-| `D:\Zunda-AI/**` or `/models/**` | Local LLM/SLM weights (GGUF etc.) |
+| `/models/**` (host cache of GGUF etc.) | Local LLM/SLM weights |
 | `logs/**` | Run outputs (large; may contain model text) |
 | `checkpoints/**` | Resume state |
 | `.env`, API keys, LM Studio tokens | Secrets |
