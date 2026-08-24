@@ -1,6 +1,6 @@
 # Restricted data (DO NOT COMMIT / DO NOT PUBLISH)
 
-Put local-only persona files here. **ずんだもん／あんこもんの聖書は非公開方針です。**  
+Put local-only persona files here. **ずんだもん／あんこもんのテキストは非公開方針です。**  
 Do not push them to GitHub (this repo or a public dataset repo).
 
 ## Expected filenames
