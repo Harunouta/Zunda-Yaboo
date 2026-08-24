@@ -22,6 +22,7 @@ _playSpec.loader.exec_module(_playMod)
 PRESETS = _playMod.PRESETS
 
 RUNS_DIR = ROOT / "logs" / "runs"
+COMPARE_DIR = ROOT / "logs" / "compare_packs"
 INDEX_PREFIX = ".viewer_index_"
 NOISE_EVENT_ID = "riot_risk"
 BLURB_MAX_CHARS = 80
@@ -35,6 +36,17 @@ MAX_IMPORT_BYTES = 80 * 1024 * 1024
 ALLOWED_ZIP_MEMBERS = frozenset(
   {"monthly.jsonl", "launch.json", "life_recap.json", "life_recap.md"}
 )
+ZIP_MEMBER_ALIASES = {
+  "monthly.jsonl": "monthly.jsonl",
+  "monthly.jsonl": "monthly.jsonl",
+  "launch.json": "launch.json",
+  "launch.json": "launch.json",
+  "life_recap.json": "life_recap.json",
+  "life_recap.json": "life_recap.json",
+  "life_recap.md": "life_recap.md",
+  "life_recap.md": "life_recap.md",
+}
+MAX_COMPARE_RUNS = 6
 
 
 def _safeStem(stem: str) -> str:
@@ -55,6 +67,11 @@ def resolveRunPath(stem: str) -> Path:
       raise ValueError("path outside logs/runs")
     if path.is_file():
       return path
+  compareRoot = COMPARE_DIR.resolve()
+  COMPARE_DIR.mkdir(parents=True, exist_ok=True)
+  comparePath = (COMPARE_DIR / stem / "monthly.jsonl").resolve()
+  if str(comparePath).startswith(str(compareRoot)) and comparePath.is_file():
+    return comparePath
   raise FileNotFoundError(stem)
 
 
@@ -580,3 +597,78 @@ def importRunArchive(raw: bytes, filename: str) -> dict:
       dest.write_bytes(archive.read(info.filename))
       imported.append(member)
   return {"stem": stem, "imported": imported}
+
+
+def _canonicalZipMember(filename: str) -> str | None:
+  member = Path(str(filename).replace("\\", "/")).name
+  if member.startswith("."):
+    return None
+  if member in ZIP_MEMBER_ALIASES:
+    return ZIP_MEMBER_ALIASES[member]
+  if member in ALLOWED_ZIP_MEMBERS:
+    return member
+  return None
+
+
+def _uniqueCompareStem(base: str) -> str:
+  stamp = datetime.now().strftime("%Y%m%d%H%M%S")
+  root = _safeStem(f"cmp_{base}"[:40])
+  suffix = 0
+  while True:
+    extra = "" if suffix == 0 else f"_{suffix}"
+    candidate = _safeStem(f"{root}_{stamp}{extra}"[:80])
+    if not (COMPARE_DIR / candidate).exists():
+      return candidate
+    suffix += 1
+
+
+def loadComparePack(raw: bytes, filename: str) -> dict:
+  if not raw:
+    raise ValueError("empty zip")
+  if len(raw) > MAX_IMPORT_BYTES:
+    raise ValueError("zip too large")
+  name = Path(filename or "run.zip").name
+  if not zipfile.is_zipfile(io.BytesIO(raw)):
+    raise ValueError("file must be a run zip")
+  COMPARE_DIR.mkdir(parents=True, exist_ok=True)
+  with zipfile.ZipFile(io.BytesIO(raw), "r") as archive:
+    mapped: dict[str, str] = {}
+    for info in archive.infolist():
+      if info.is_dir():
+        continue
+      canonical = _canonicalZipMember(info.filename)
+      if not canonical:
+        continue
+      mapped[canonical] = info.filename
+    if "monthly.jsonl" not in mapped:
+      raise ValueError("zip needs monthly.jsonl")
+    stem = _uniqueCompareStem(_stemFromFilename(name.replace(".zip", "")))
+    destDir = COMPARE_DIR / stem
+    destDir.mkdir(parents=True, exist_ok=True)
+    imported: list[str] = []
+    for canonical, zipName in mapped.items():
+      dest = destDir / canonical
+      dest.write_bytes(archive.read(zipName))
+      imported.append(canonical)
+  launch: dict = {}
+  launchPath = COMPARE_DIR / stem / "launch.json"
+  if launchPath.is_file():
+    try:
+      parsed = json.loads(launchPath.read_text(encoding="utf-8"))
+      if isinstance(parsed, dict):
+        launch = parsed
+    except (json.JSONDecodeError, OSError):
+      launch = {}
+  recapPath = COMPARE_DIR / stem / "life_recap.json"
+  return {
+    "stem": stem,
+    "label": Path(name).stem,
+    "imported": imported,
+    "standard": launch.get("standard"),
+    "span": (
+      f"{launch.get('start')}..{launch.get('end')}"
+      if launch.get("start") and launch.get("end")
+      else ""
+    ),
+    "hasRecap": recapPath.is_file(),
+  }

@@ -31,8 +31,9 @@ powershell -File .\scripts\republish_viewer_port.ps1
 
 - ランフォルダ `logs/runs/<名前>/monthly.jsonl` を選ぶ
 - 「AI / モデル」で LM Studio または OpenAI と役モデルを保存（Cursor 不要）
-- 実行中は推論中の年月
+- 実行中は推論中の年月（この表示は **今動いている閲覧サーバのメモリ**。サーバを再起動すると sim が生きていても消える。HTML だけの変更では再起動しない）
 - 「その年を見る」で布告・マスコット・世論
+- ポップアップが消えても `logs/runs/<名前>/monthly.jsonl` の末尾と `logs/viewer_job.out` で進捗は読める
 
 同じ起動: `python scripts/operator_cui.py` の `v`、または `python scripts/operator_cui.py --serve-viewer`
 

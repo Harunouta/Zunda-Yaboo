@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Zunda-Yaboo ラン比較</title>
+  <link rel="stylesheet" href="/app.css" />
+  <link rel="stylesheet" href="/compare.css" />
+</head>
+<body>
+  <header class="top">
+    <h1>ラン比較（閲覧のみ）</h1>
+    <p class="sub">
+      本閲覧の「このランを zip で出す」で作った zip を複数選ぶ。起動・設定・再推論はなし。
+      <a href="/">本閲覧へ戻る</a>
+    </p>
+  </header>
+  <main class="compareMain">
+    <section class="pane">
+      <h2>zip を載せる</h2>
+      <label>複数のラン zip
+        <input id="zipFiles" type="file" accept=".zip,application/zip" multiple />
+      </label>
+      <p id="loadStatus" class="hint">まだ載せていないのだ</p>
+      <div id="packLegend" class="packLegend"></div>
+      <label class="check"><input id="onlyEvents" type="checkbox" /> イベント月だけ</label>
+      <label class="check"><input id="onlyBigChanges" type="checkbox" /> 指標・イベントが大きく変わった月だけ</label>
+      <label class="check"><input id="onlySpeech" type="checkbox" /> マスコットがしゃべった月だけ</label>
+      <button type="button" id="reloadBtn">読み直す</button>
+      <p id="rangeMeta" class="hint"></p>
+      <p class="hint">グラフは年次中央値を色分けして重ねる。凸凹クリックでその年の横断表へ。</p>
+      <h3>人口（年次ざっくり）</h3>
+      <canvas id="chartPop" width="960" height="180"></canvas>
+      <h3>食/人円（年次中央値）</h3>
+      <canvas id="chartFood" width="960" height="180"></canvas>
+      <h3>fidelity</h3>
+      <canvas id="chartFid" width="960" height="180"></canvas>
+      <h3>米・ずんだ価格（sim）</h3>
+      <canvas id="chartPrice" width="960" height="200"></canvas>
+      <h3>期間の総括</h3>
+      <div id="lifeRecapBox" class="compareGrid"></div>
+      <label>year <input id="yearTrace" type="text" value="1853" /></label>
+      <button type="button" id="yearTraceBtn">その年を横断する</button>
+      <div id="yearTraceBox" class="compareGrid"></div>
+      <h3>発生したイベント</h3>
+      <p class="hint">riot_risk は除く。月をクリックすると下で各ランの詳細を並べる。</p>
+      <ul id="eventLog"></ul>
+      <h3>月</h3>
+      <ul id="monthList"></ul>
+    </section>
+  </main>
+  <script src="/compare.js"></script>
+</body>
+</html>

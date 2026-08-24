@@ -418,6 +418,13 @@ class ViewerHandler(BaseHTTPRequestHandler):
         status, data, ctype = jsonBytes(payload)
         self._send(status, data, ctype)
         return
+      if parsed.path == "/api/compare/load":
+        query = parse_qs(parsed.query)
+        filename = query.get("filename", ["run.zip"])[0]
+        payload = run_log_read.loadComparePack(raw, filename)
+        status, data, ctype = jsonBytes(payload)
+        self._send(status, data, ctype)
+        return
       body = json.loads(raw.decode("utf-8") or "{}")
       matchLifeRecap = re.match(r"^/api/runs/([^/]+)/life-recap$", parsed.path)
       if matchLifeRecap:

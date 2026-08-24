@@ -1,0 +1,68 @@
+.compareMain {
+  max-width: 1100px;
+  padding: 16px 20px 48px;
+}
+
+.packLegend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px 0 12px;
+}
+
+.packChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 12px;
+}
+
+.packDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.compareGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 10px;
+  margin: 10px 0 18px;
+}
+
+.compareCol {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: #252526;
+}
+
+.compareCol h4 {
+  margin: 0 0 8px;
+  font-size: 13px;
+}
+
+.compareCol pre,
+.compareCol .recapBody {
+  white-space: pre-wrap;
+  font-size: 12px;
+  margin: 0;
+}
+
+.monthMarks {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  margin-top: 4px;
+}
+
+#monthList .monthExpand {
+  display: block;
+}
+
+#eventLog li.yearHit {
+  outline: 1px solid var(--accent);
+}
