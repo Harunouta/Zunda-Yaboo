@@ -1,12 +1,33 @@
 services:
+  llm-gateway:
+    build:
+      context: ./gateway
+      dockerfile: Dockerfile
+    container_name: zunda-llm-gw
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      GW_LMSTUDIO_HOST: ${GW_LMSTUDIO_HOST:-host.docker.internal}
+      GW_LMSTUDIO_PORT: ${GW_LMSTUDIO_PORT:-1234}
+      GW_POLICY_MODEL: ${GW_POLICY_MODEL:-qwen3-4b-instruct-2507}
+      GW_IDS_MODEL: ${GW_IDS_MODEL:-qwen2.5-7b-instruct}
+      GW_PROSE_MODEL: ${GW_PROSE_MODEL:-qwen2.5-14b-instruct}
+      GW_CRISIS_MODEL: ${GW_CRISIS_MODEL:-qwen3.6-27b}
+      GW_CRISIS_USE_27B: ${GW_CRISIS_USE_27B:-1}
+    ports:
+      - "4000:4000"
+    restart: unless-stopped
+
   zunda-yaboo:
     build: .
     container_name: zunda-yaboo-run
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    depends_on:
+      - llm-gateway
     environment:
-      LM_STUDIO_HOST: ${LM_STUDIO_HOST:-host.docker.internal}
-      LM_STUDIO_PORT: ${LM_STUDIO_PORT:-1234}
+      LM_STUDIO_HOST: ${LM_STUDIO_HOST:-llm-gateway}
+      LM_STUDIO_PORT: ${LM_STUDIO_PORT:-4000}
       RULER_MODEL: ${RULER_MODEL:-qwen3.6-27b}
       CROWD_MODEL: ${CROWD_MODEL:-google/gemma-4-e4b}
       ZUNDA_AI_DIR: /models

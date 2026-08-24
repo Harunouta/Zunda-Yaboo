@@ -19,6 +19,13 @@ let lastViewYm = "";
 let chartYears = [];
 const CHART_PAD_LEFT = 44;
 const CHART_PAD_RIGHT = 12;
+const SIM_MIN_YEAR = 1603;
+const SIM_MAX_YEAR = 2026;
+const SIM_LAST_MONTH = 8;
+const DEFAULT_START_YEAR = 1853;
+const DEFAULT_START_MONTH = 1;
+const DEFAULT_END_YEAR = 1853;
+const DEFAULT_END_MONTH = 12;
 const CHART_IDS = ["chartPop", "chartFood", "chartFid", "chartPrice"];
 const SEC_PER_MINUTE = 60;
 const SEC_PER_HOUR = 3600;
@@ -488,6 +495,51 @@ async function openMonth(stem, yearMonth, expand) {
   fillMonthDetail(expand, data, yearMonth);
 }
 
+function renderSplitPlan(host, lanes) {
+  if (!host) return;
+  host.innerHTML = "";
+  if (!lanes || !lanes.length) return;
+  for (const lane of lanes) {
+    const card = document.createElement("article");
+    card.className = "splitLane splitLane-" + (lane.lane || "");
+    const heading = document.createElement("h3");
+    heading.textContent = lane.title || lane.lane || "レーン";
+    const blurb = document.createElement("p");
+    blurb.className = "hint";
+    const simBit = lane.simModel ? ` シミュが呼ぶ名前: ${lane.simRole || ""} = ${lane.simModel}` : "";
+    blurb.textContent = (lane.blurb || "") + simBit;
+    const table = document.createElement("ul");
+    table.className = "splitTasks";
+    for (const task of lane.tasks || []) {
+      const row = document.createElement("li");
+      if (task.present === true) row.className = "isPresent";
+      if (task.present === false) row.className = "isMissing";
+      const how = document.createElement("span");
+      how.className = "splitHow";
+      how.textContent = task.how || "";
+      const label = document.createElement("span");
+      label.className = "splitLabel";
+      label.textContent = task.label || task.id || "";
+      const model = document.createElement("code");
+      model.textContent = task.modelId || "";
+      row.appendChild(how);
+      row.appendChild(label);
+      row.appendChild(model);
+      if (task.present === true || task.present === false) {
+        const badge = document.createElement("span");
+        badge.className = "modelStatus " + (task.present ? "present" : "missing");
+        badge.textContent = task.present ? "ある" : "ない";
+        row.appendChild(badge);
+      }
+      table.appendChild(row);
+    }
+    card.appendChild(heading);
+    card.appendChild(blurb);
+    card.appendChild(table);
+    host.appendChild(card);
+  }
+}
+
 async function fillSettings() {
   const data = await fetchJson("/api/settings");
   document.getElementById("provider").value = data.provider || "lmstudio";
@@ -495,8 +547,19 @@ async function fillSettings() {
   document.getElementById("lmStudioPort").value = String(data.lmStudioPort || "1234");
   document.getElementById("openaiBaseUrl").value = data.openaiBaseUrl || "";
   document.getElementById("openaiApiKey").value = "";
+  const hint = document.getElementById("gatewayHint");
+  if (hint) hint.textContent = data.gatewayHint || "";
   fillRoleSelects(Object.values(data.roles || {}), data.roles);
+  renderSplitPlan(document.getElementById("splitPlanBox"), data.splitPlan);
   settingsBox.textContent = JSON.stringify(data, null, 2);
+  refreshSplitInventory().catch(() => {});
+}
+
+async function refreshSplitInventory() {
+  const data = await fetchJson("/api/settings/gateway-default");
+  if (data.splitPlan && data.splitPlan.length) {
+    renderSplitPlan(document.getElementById("splitPlanBox"), data.splitPlan);
+  }
 }
 
 async function probeModels() {
@@ -530,6 +593,78 @@ async function saveSettings() {
   });
   document.getElementById("openaiApiKey").value = "";
   settingsBox.textContent = JSON.stringify(data, null, 2);
+}
+
+function closeGatewayDefaultPopup() {
+  document.getElementById("defaultPresetPopup").hidden = true;
+}
+
+async function openGatewayDefaultPopup() {
+  const summary = document.getElementById("defaultPresetSummary");
+  const list = document.getElementById("defaultPresetList");
+  const okBtn = document.getElementById("defaultPresetOkBtn");
+  summary.textContent = "LM Studio のカタログを探しています…";
+  summary.className = "presetSummary";
+  list.innerHTML = "";
+  document.getElementById("defaultPresetPopup").hidden = false;
+  let data;
+  try {
+    data = await fetchJson("/api/settings/gateway-default");
+  } catch (error) {
+    summary.textContent = `探せていません: ${error.message || error}`;
+    summary.className = "presetSummary isMissing";
+    return;
+  }
+  const requiredPresent = Number(data.requiredPresent || 0);
+  const requiredTotal = Number(data.requiredTotal || 0);
+  const optionalPresent = Number(data.optionalPresent || 0);
+  const optionalTotal = Number(data.optionalTotal || 0);
+  if (!data.probeSource) {
+    summary.textContent = `探せていません。LM Studio（:1234）かゲートウェイ（:4000）を起動して、もう一度開いてください。${data.probeError || ""}`;
+    summary.className = "presetSummary isMissing";
+  } else if (data.ready) {
+    summary.textContent = `必須 ${requiredPresent}/${requiredTotal} そろった（${data.probeSource}）。任意 ${optionalPresent}/${optionalTotal}。`;
+    summary.className = "presetSummary isReady";
+  } else {
+    summary.textContent = `必須が足りない ${requiredPresent}/${requiredTotal}（${data.probeSource}）。ない必須を Discover から入れて、もう一度開いてください。`;
+    summary.className = "presetSummary isMissing";
+  }
+  renderSplitPlan(document.getElementById("defaultPresetSplit"), data.splitPlan);
+  for (const item of data.downloadList || []) {
+    const row = document.createElement("li");
+    row.className = item.present ? "isPresent" : "isMissing";
+    const badge = document.createElement("span");
+    badge.className = "modelStatus " + (item.present ? "present" : "missing");
+    badge.textContent = item.present ? "ある" : "ない";
+    const body = document.createElement("div");
+    const title = document.createElement("strong");
+    title.textContent = `${item.required ? "必須" : "任意"} · ${item.id}`;
+    const purpose = document.createElement("span");
+    purpose.className = "modelPurpose";
+    purpose.textContent = item.purpose || "";
+    body.appendChild(title);
+    body.appendChild(purpose);
+    if (item.present && item.matchedId && item.matchedId !== item.id) {
+      const matched = document.createElement("span");
+      matched.className = "modelMatched";
+      matched.textContent = `一致: ${item.matchedId}`;
+      body.appendChild(matched);
+    }
+    row.appendChild(badge);
+    row.appendChild(body);
+    list.appendChild(row);
+  }
+  okBtn.disabled = false;
+}
+
+async function confirmGatewayDefault() {
+  await fetchJson("/api/settings/apply-gateway-default", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: "{}",
+  });
+  closeGatewayDefaultPopup();
+  await fillSettings();
 }
 
 async function loadYearTrace() {
@@ -601,11 +736,83 @@ async function stopRun() {
   }
 }
 
+function padMonth(month) {
+  return String(month).padStart(2, "0");
+}
+
+function maxMonthForYear(year) {
+  return Number(year) >= SIM_MAX_YEAR ? SIM_LAST_MONTH : 12;
+}
+
+function fillYearOptions(select, selectedYear) {
+  select.innerHTML = "";
+  for (let year = SIM_MIN_YEAR; year <= SIM_MAX_YEAR; year += 1) {
+    const option = document.createElement("option");
+    option.value = String(year);
+    option.textContent = String(year);
+    select.appendChild(option);
+  }
+  select.value = String(selectedYear);
+}
+
+function fillMonthOptions(select, year, selectedMonth) {
+  const maxMonth = maxMonthForYear(year);
+  const month = Math.min(Number(selectedMonth) || 1, maxMonth);
+  select.innerHTML = "";
+  for (let n = 1; n <= maxMonth; n += 1) {
+    const option = document.createElement("option");
+    option.value = String(n);
+    option.textContent = padMonth(n);
+    select.appendChild(option);
+  }
+  select.value = String(month);
+}
+
+function yearMonthValue(yearId, monthId) {
+  const year = document.getElementById(yearId).value;
+  const month = padMonth(document.getElementById(monthId).value);
+  return year + "-" + month;
+}
+
+function clampSpanOrder() {
+  const start = yearMonthValue("startYear", "startMonth");
+  const end = yearMonthValue("endYear", "endMonth");
+  if (end >= start) return;
+  document.getElementById("endYear").value = document.getElementById("startYear").value;
+  fillMonthOptions(
+    document.getElementById("endMonth"),
+    document.getElementById("endYear").value,
+    document.getElementById("startMonth").value,
+  );
+}
+
+function onSpanYearChange(yearId, monthId) {
+  const yearSelect = document.getElementById(yearId);
+  const monthSelect = document.getElementById(monthId);
+  fillMonthOptions(monthSelect, yearSelect.value, monthSelect.value);
+  clampSpanOrder();
+}
+
+function initSpanPickers() {
+  fillYearOptions(document.getElementById("startYear"), DEFAULT_START_YEAR);
+  fillYearOptions(document.getElementById("endYear"), DEFAULT_END_YEAR);
+  fillMonthOptions(document.getElementById("startMonth"), DEFAULT_START_YEAR, DEFAULT_START_MONTH);
+  fillMonthOptions(document.getElementById("endMonth"), DEFAULT_END_YEAR, DEFAULT_END_MONTH);
+  document.getElementById("startYear").addEventListener("change", () => {
+    onSpanYearChange("startYear", "startMonth");
+  });
+  document.getElementById("endYear").addEventListener("change", () => {
+    onSpanYearChange("endYear", "endMonth");
+  });
+  document.getElementById("startMonth").addEventListener("change", clampSpanOrder);
+  document.getElementById("endMonth").addEventListener("change", clampSpanOrder);
+}
+
 async function launchRun() {
   const payload = {
     standard: document.getElementById("standard").value,
-    start: document.getElementById("start").value.trim(),
-    end: document.getElementById("end").value.trim(),
+    start: yearMonthValue("startYear", "startMonth"),
+    end: yearMonthValue("endYear", "endMonth"),
     runName: document.getElementById("runName").value.trim(),
     noLlm: document.getElementById("noLlm").checked,
     historicalPolicy: document.getElementById("historicalPolicy").checked,
@@ -671,6 +878,17 @@ document.getElementById("probeBtn").addEventListener("click", () => {
     settingsBox.textContent = String(error.message || error);
   });
 });
+document.getElementById("applyGatewayDefaultBtn").addEventListener("click", () => {
+  openGatewayDefaultPopup().catch((error) => {
+    settingsBox.textContent = String(error.message || error);
+  });
+});
+document.getElementById("defaultPresetCancelBtn").addEventListener("click", closeGatewayDefaultPopup);
+document.getElementById("defaultPresetOkBtn").addEventListener("click", () => {
+  confirmGatewayDefault().catch((error) => {
+    settingsBox.textContent = String(error.message || error);
+  });
+});
 document.getElementById("yearTraceBtn").addEventListener("click", () => {
   loadYearTrace().catch((error) => {
     yearTraceBox.textContent = String(error.message || error);
@@ -692,6 +910,7 @@ function pollJob() {
 }
 
 bindChartClicks();
+initSpanPickers();
 fillSettings()
   .then(loadRuns)
   .then(loadView)

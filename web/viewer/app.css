@@ -63,6 +63,22 @@ label {
   margin: 8px 0;
 }
 
+.yearMonthPick {
+  display: grid;
+  grid-template-columns: 1fr 5.6em;
+  gap: 8px;
+  margin: 8px 0 12px;
+}
+
+.yearMonthPick > span {
+  grid-column: 1 / -1;
+  font-size: 12px;
+}
+
+.yearMonthPick label {
+  margin: 0;
+}
+
 input[type="text"],
 select {
   display: block;
@@ -357,4 +373,194 @@ body.jobRunning {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+#defaultPresetPopup {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+#defaultPresetPopup[hidden] {
+  display: none;
+}
+
+.defaultPresetCard {
+  width: min(520px, 94vw);
+  max-height: 86vh;
+  overflow: auto;
+  padding: 18px 20px;
+  background: #1a1a22;
+  border: 2px solid var(--accent);
+  border-radius: 16px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
+}
+
+#defaultPresetList {
+  list-style: none;
+  margin: 10px 0 16px;
+  padding: 0;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+#defaultPresetList li {
+  display: grid;
+  grid-template-columns: 3.6em 1fr;
+  gap: 10px;
+  align-items: start;
+  margin: 0 0 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #16161c;
+}
+
+#defaultPresetList li.isPresent {
+  border-color: #2f6f45;
+}
+
+#defaultPresetList li.isMissing {
+  border-color: #8a3333;
+  background: #241416;
+}
+
+.modelStatus {
+  display: inline-block;
+  text-align: center;
+  font-weight: 700;
+  font-size: 12px;
+  padding: 3px 0;
+  border-radius: 999px;
+}
+
+.modelStatus.present {
+  background: #1f5d32;
+  color: #b6f5c8;
+}
+
+.modelStatus.missing {
+  background: #6b1d1d;
+  color: #ffb4b4;
+}
+
+.modelPurpose,
+.modelMatched {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+.presetSummary {
+  font-size: 13px;
+  font-weight: 600;
+  margin: 8px 0 4px;
+}
+
+.presetSummary.isReady {
+  color: #b6f5c8;
+}
+
+.presetSummary.isMissing {
+  color: #ffb4b4;
+}
+
+.presetActions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.splitPlanTitle {
+  margin: 14px 0 6px;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+}
+
+.splitPlan {
+  display: grid;
+  gap: 10px;
+  margin: 0 0 12px;
+}
+
+.splitLane {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: #16161c;
+}
+
+.splitLane h3 {
+  margin: 0 0 4px;
+  font-size: 14px;
+}
+
+.splitLane-ruler {
+  border-color: #4fc1ff;
+  box-shadow: inset 3px 0 0 #4fc1ff;
+}
+
+.splitLane-voices {
+  border-color: #ce9178;
+  box-shadow: inset 3px 0 0 #ce9178;
+}
+
+.splitTasks {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+}
+
+.splitTasks li {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas:
+    "how label badge"
+    "how model badge";
+  gap: 2px 8px;
+  padding: 7px 0;
+  border-top: 1px solid var(--line);
+  font-size: 12px;
+}
+
+.splitHow {
+  grid-area: how;
+  align-self: start;
+  color: var(--accent);
+  font-weight: 700;
+  min-width: 3.2em;
+}
+
+.splitLabel {
+  grid-area: label;
+  color: var(--fg);
+}
+
+.splitTasks code {
+  grid-area: model;
+  font-size: 11px;
+  color: #ce9178;
+  overflow-wrap: anywhere;
+}
+
+.splitTasks .modelStatus {
+  grid-area: badge;
+  align-self: center;
+}
+
+.rawSettings {
+  margin: 10px 0 16px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.secondaryBtn {
+  background: #333;
+  color: var(--fg);
 }

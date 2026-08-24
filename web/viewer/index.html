@@ -14,7 +14,7 @@
   <main class="layout">
     <section class="pane" id="launchPane">
       <h2>AI / モデル</h2>
-      <p class="hint">Cursor 不要。LM Studio（OpenAI 互換）か OpenAI API。役ごとにモデル ID。保存先は <code>logs/viewer_settings.json</code>。</p>
+      <p class="hint">セレクトはシミュが呼ぶ役名1本です。ポート 4000 のゲートウェイは為政者を数値・法令ID・布告・危機に分解し、市井は通します。分担は下のレーンです。</p>
       <label>provider
         <select id="provider">
           <option value="lmstudio">lmstudio</option>
@@ -25,14 +25,22 @@
       <label>LM Studio port <input id="lmStudioPort" type="text" /></label>
       <label>OpenAI base URL <input id="openaiBaseUrl" type="text" /></label>
       <label>OpenAI API key <input id="openaiApiKey" type="password" autocomplete="off" /></label>
-      <label>ruler モデル <select id="roleRuler"></select></label>
-      <label>crowd モデル <select id="roleCrowd"></select></label>
-      <label>mascot モデル <select id="roleMascot"></select></label>
-      <label>opinion モデル <select id="roleOpinion"></select></label>
-      <label>agri モデル <select id="roleAgri"></select></label>
+      <p id="gatewayHint" class="hint"></p>
+      <h3 class="splitPlanTitle">いまの分担</h3>
+      <section id="splitPlanBox" class="splitPlan" aria-live="polite"></section>
+      <h3 class="splitPlanTitle">シミュが呼ぶ名前</h3>
+      <label>為政者（ゲートウェイが分解） <select id="roleRuler"></select></label>
+      <label>群衆へ通す <select id="roleCrowd"></select></label>
+      <label>マスコットへ通す <select id="roleMascot"></select></label>
+      <label>オピニオンへ通す <select id="roleOpinion"></select></label>
+      <label>農・物流へ通す <select id="roleAgri"></select></label>
       <button type="button" id="saveSettingsBtn">設定を保存</button>
+      <button type="button" id="applyGatewayDefaultBtn">デフォルト設定を適用</button>
       <button type="button" id="probeBtn">モデルを探る</button>
-      <pre id="settingsBox" class="job"></pre>
+      <details class="rawSettings">
+        <summary>設定の生JSON</summary>
+        <pre id="settingsBox" class="job"></pre>
+      </details>
       <h2>設定 / 起動</h2>
       <p class="hint">既定は 12ヶ月・`--no-llm`。1603–2026 フルは確認チェックなしでは拒否。同時1ジョブ。`--live` 相当は historicalPolicy を付けない。</p>
       <label>standard
@@ -46,8 +54,24 @@
           <option value="historical">historical</option>
         </select>
       </label>
-      <label>start <input id="start" type="text" value="1853-01" /></label>
-      <label>end <input id="end" type="text" value="1853-12" /></label>
+      <div class="yearMonthPick">
+        <span>開始</span>
+        <label>年
+          <select id="startYear"></select>
+        </label>
+        <label>月
+          <select id="startMonth"></select>
+        </label>
+      </div>
+      <div class="yearMonthPick">
+        <span>終了（上限 2026年8月）</span>
+        <label>年
+          <select id="endYear"></select>
+        </label>
+        <label>月
+          <select id="endMonth"></select>
+        </label>
+      </div>
       <label>run-name <input id="runName" type="text" value="viewer_short" /></label>
       <label class="check"><input id="noLlm" type="checkbox" checked /> --no-llm</label>
       <label class="check"><input id="historicalPolicy" type="checkbox" /> --historical-policy（本ラン用。短デモには付けない）</label>
@@ -113,6 +137,21 @@
       <button type="button" id="busyStopBtn">止める</button>
     </div>
   </div>
-  <script src="/app.js"></script>
+  <div id="defaultPresetPopup" hidden>
+    <div class="defaultPresetCard">
+      <p class="jobPopupTitle">ゲートウェイ既定を適用するのだ</p>
+      <p class="hint">クラウド OpenAI にはしません。向き先は Docker ゲートウェイ :4000 です。為政者レーンが4仕事に分かれているのが既定です。</p>
+      <p id="defaultPresetSummary" class="presetSummary"></p>
+      <h3 class="splitPlanTitle">既定の分担</h3>
+      <div id="defaultPresetSplit" class="splitPlan"></div>
+      <p class="hint">手持ちカタログ（ある／ない）</p>
+      <ul id="defaultPresetList"></ul>
+      <div class="presetActions">
+        <button type="button" id="defaultPresetOkBtn">確認して適用</button>
+        <button type="button" id="defaultPresetCancelBtn" class="secondaryBtn">やめる</button>
+      </div>
+    </div>
+  </div>
+  <script src="/app.js?v=span-pickers-1"></script>
 </body>
 </html>

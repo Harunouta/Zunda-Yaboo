@@ -329,6 +329,10 @@ class ViewerHandler(BaseHTTPRequestHandler):
         status, body, ctype = jsonBytes(jobSnapshot())
         self._send(status, body, ctype)
         return
+      if path == "/api/settings/gateway-default":
+        status, body, ctype = jsonBytes(llm_settings.gatewayDefaultWithInventory())
+        self._send(status, body, ctype)
+        return
       if path == "/api/settings":
         status, body, ctype = jsonBytes(llm_settings.publicSettings())
         self._send(status, body, ctype)
@@ -420,6 +424,11 @@ class ViewerHandler(BaseHTTPRequestHandler):
         os.environ.update(llm_settings.settingsEnv())
         useLlm = bool(body.get("useLlm", True))
         payload = run_log_read.generateLifeRecap(matchLifeRecap.group(1), useLlm=useLlm)
+        status, data, ctype = jsonBytes(payload)
+        self._send(status, data, ctype)
+        return
+      if parsed.path == "/api/settings/apply-gateway-default":
+        payload = llm_settings.applyGatewayDefault()
         status, data, ctype = jsonBytes(payload)
         self._send(status, data, ctype)
         return
