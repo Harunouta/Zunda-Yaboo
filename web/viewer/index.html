@@ -75,7 +75,10 @@
       <label>run-name <input id="runName" type="text" value="viewer_short" /></label>
       <label class="check"><input id="noLlm" type="checkbox" checked /> --no-llm</label>
       <label class="check"><input id="historicalPolicy" type="checkbox" /> --historical-policy（本ラン用。短デモには付けない）</label>
+      <label class="check"><input id="resume" type="checkbox" /> --resume（checkpoints/latest.json から続き。同じ run-name の jsonl は消さない）</label>
       <label class="check"><input id="confirmFullSpan" type="checkbox" /> 24ヶ月超／長スパン実施（高負荷＆長時間になるので注意）</label>
+      <p class="hint">再開するときは終了年月と run-name を元のランに合わせる。開始年月はチェックポイント側が使う。いま走っているジョブがあるときは投げない。</p>
+      <button type="button" id="fillResumeBtn">開いているラン名を入れて再開にする</button>
       <button type="button" id="launchBtn">短いランを投げる</button>
       <button type="button" id="stopBtn">止める</button>
       <pre id="jobBox" class="job"></pre>

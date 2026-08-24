@@ -816,6 +816,7 @@ async function launchRun() {
     runName: document.getElementById("runName").value.trim(),
     noLlm: document.getElementById("noLlm").checked,
     historicalPolicy: document.getElementById("historicalPolicy").checked,
+    resume: document.getElementById("resume").checked,
     confirmFullSpan: document.getElementById("confirmFullSpan").checked,
   };
   try {
@@ -864,6 +865,14 @@ document.getElementById("importFile").addEventListener("change", (event) => {
   importRunFile(file).catch((error) => {
     rangeMeta.textContent = String(error.message || error);
   });
+});
+document.getElementById("fillResumeBtn").addEventListener("click", () => {
+  const stem = runSelect.value;
+  if (stem) {
+    document.getElementById("runName").value = stem;
+  }
+  document.getElementById("resume").checked = true;
+  document.getElementById("confirmFullSpan").checked = true;
 });
 document.getElementById("launchBtn").addEventListener("click", launchRun);
 document.getElementById("stopBtn").addEventListener("click", stopRun);

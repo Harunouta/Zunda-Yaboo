@@ -11,5 +11,7 @@
 | 5 | [`data/events/README.md`](../data/events/README.md) | イベント編集 |
 | 6 | [`data/events/UNIFIED_EVENTS_SPEC.md`](../data/events/UNIFIED_EVENTS_SPEC.md) | Excel 仕様 |
 | 7 | [`MODELS.md`](../MODELS.md) | LM Studio |
-| 8 | [`REDISTRIBUTION.md`](../REDISTRIBUTION.md) | 公開切り分け |
-| 9 | [`DOLLAR_STANDARD.md`](../DOLLAR_STANDARD.md) | ドル本位 |
+| 8 | [`RULES_VS_LLM.md`](RULES_VS_LLM.md) | 月次エンジン：ルール vs LLM |
+| 9 | [`INTERNALS.md`](INTERNALS.md) | 農三角・政策 kit・オピニオン・メディエータ・モデル配線 |
+| 10 | [`REDISTRIBUTION.md`](../REDISTRIBUTION.md) | 公開切り分け |
+| 11 | [`DOLLAR_STANDARD.md`](../DOLLAR_STANDARD.md) | ドル本位 |

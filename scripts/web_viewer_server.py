@@ -149,6 +149,7 @@ def startJob(body: dict) -> dict:
   end = str(body.get("end") or "1853-12")
   noLlm = bool(body.get("noLlm", True))
   historicalPolicy = bool(body.get("historicalPolicy", False))
+  resume = bool(body.get("resume", False))
   confirmFullSpan = bool(body.get("confirmFullSpan", False))
   runName = str(body.get("runName") or "viewer_short")
 
@@ -176,6 +177,7 @@ def startJob(body: dict) -> dict:
     "end": end,
     "noLlm": noLlm,
     "historicalPolicy": historicalPolicy,
+    "resume": resume,
   })
   llmEnv = llm_settings.settingsEnv()
   cmd = [
@@ -194,6 +196,8 @@ def startJob(body: dict) -> dict:
   ]
   if historicalPolicy:
     cmd.append("--historical-policy")
+  if resume:
+    cmd.append("--resume")
 
   env = os.environ.copy()
   env["PYTHONPATH"] = str(ROOT)
@@ -246,6 +250,8 @@ def startJob(body: dict) -> dict:
       ]
       if historicalPolicy:
         dockerCmd.append("--historical-policy")
+      if resume:
+        dockerCmd.append("--resume")
       proc = subprocess.Popen(
         dockerCmd,
         cwd=str(ROOT),

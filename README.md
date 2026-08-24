@@ -79,6 +79,8 @@ python -m src.main --no-llm --standard edo_metal --historical-policy --start 160
 LM Studio 既定: 統治 `qwen3.6-27b`、crowd `qwen2.5-7b-instruct`（詳細 [MODELS.md](MODELS.md)）。  
 27B と別の大モデルを同時 Load すると `terminated` になりやすいので、crowd は 7B を推奨。
 
+月次のどこが数式でどこが LLM かは [docs/RULES_VS_LLM.md](docs/RULES_VS_LLM.md)。農の三角・政策カード・オピニオン伝播などの図は [docs/INTERNALS.md](docs/INTERNALS.md)。
+
 ## GitHub
 
 リモート: [Harunouta/Zunda-Yaboo](https://github.com/Harunouta/Zunda-Yaboo)（いまは private。公開するときは GitHub の Visibility を public に切り替えるだけでよい）。

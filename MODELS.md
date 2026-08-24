@@ -1,5 +1,7 @@
 # Local SLM / model cache
 
+役割分担の図: [`docs/MODEL_WIRING.md`](docs/MODEL_WIRING.md)。
+
 Host path: set `ZUNDA_AI_HOST` or `ZUNDA_AI_DIR` (container mount is `/models`). Do not hard-code a drive letter.  
 Container mount: `/models` (`ZUNDA_AI_DIR`)
 
