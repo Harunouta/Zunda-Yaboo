@@ -281,12 +281,7 @@ function fillMonthColumn(host, data, pack) {
   }
   const dl = document.createElement("dl");
   const rows = [
-    ["events", (data.events || []).join(", ")],
-    ["decree", data.decree],
-    ["rulerReason", data.rulerReason],
-    ["mascot", `${data.mascotId || ""} ${data.mascotSpeech || ""}`],
-    ["mood", data.moodText],
-    ["rumor", data.rumor],
+    ["events", (data.events || []).join(" / ")],
     ["population", data.population],
     ["foodYen", data.purchasingPower && data.purchasingPower.foodYenPerCapita],
     ["fidelity", data.fidelity],
@@ -405,8 +400,11 @@ async function loadYearTrace() {
         `/api/runs/${encodeURIComponent(pack.stem)}/year/${encodeURIComponent(year)}`
       );
       const lines = (data.months || []).map((month) => {
-        const events = (month.events || []).join(",");
-        return `${month.yearMonth} [${events}] ${month.mascotSpeech || month.decree || ""}`;
+        const events = (month.events || []).join(" / ");
+        const extra = month.decree || "";
+        return extra
+          ? `${month.yearMonth}  ${events}  ${extra}`
+          : `${month.yearMonth}  ${events}`;
       });
       body.textContent = lines.join("\n") || "その年の月はないのだ";
     } catch (error) {

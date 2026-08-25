@@ -1,7 +1,7 @@
 # Redistribution map (GitHub publication prep)
 
-This repo is prepared for a future public GitHub release.  
-**Do not commit restricted assets.** Remote / `gh` setup is intentionally not done yet.
+This repo is prepared for a public GitHub release.  
+**Do not commit restricted assets.** Remote exists (`origin`); do not `git push` until the owner asks.
 
 ## Quick legend
 
@@ -25,7 +25,7 @@ This repo is prepared for a future public GitHub release.
 | `README.md`, `MODELS.md`, `LICENSE`, this file | Docs (not Cursor/agent handoff files) |
 | `licenses/**` | Attribution |
 | `data/events/**` | User-editable history tables (OK to publish; keep sparse) |
-| `data/redistributable/**` | Synthetic / original sample data only |
+| `data/redistributable/**` | Synthetic / original sample data only. Includes speechless `compare_packs/*.zip` |
 | `.gitignore` | Keeps NO paths out of git |
 
 Historical event *IDs and short Japanese prompt strings* in `src/events.py` and  
@@ -93,4 +93,4 @@ zunda-yaboo/
 2. README links character guidelines instead of embedding full corpora  
 3. Confirm PyYAML / base image licenses unchanged  
 5. `python scripts/check_redistribution.py` passes  
-6. Then (later) create GitHub remote — not part of current setup  
+6. Owner flips GitHub visibility to public if desired, then `git push` (not automated here)  

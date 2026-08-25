@@ -11,7 +11,7 @@
   <header class="top">
     <h1>ラン比較（閲覧のみ）</h1>
     <p class="sub">
-      本閲覧の「このランを zip で出す」で作った zip を複数選ぶ。起動・設定・再推論はなし。
+      本閲覧の「このランを zip で出す」か、統計比較用 zip（monthly.jsonl + launch.json、総括なし）を複数選ぶ。起動・設定・再推論はなし。
       <a href="/">本閲覧へ戻る</a>
     </p>
   </header>
@@ -38,6 +38,7 @@
       <h3>米・ずんだ価格（sim）</h3>
       <canvas id="chartPrice" width="960" height="200"></canvas>
       <h3>期間の総括</h3>
+      <p class="hint">統計比較用 zip には入っていない。グラフとイベント一覧だけで足りる。</p>
       <div id="lifeRecapBox" class="compareGrid"></div>
       <label>year <input id="yearTrace" type="text" value="1853" /></label>
       <button type="button" id="yearTraceBtn">その年を横断する</button>

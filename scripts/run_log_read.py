@@ -24,7 +24,7 @@ PRESETS = _playMod.PRESETS
 RUNS_DIR = ROOT / "logs" / "runs"
 COMPARE_DIR = ROOT / "logs" / "compare_packs"
 INDEX_PREFIX = ".viewer_index_"
-NOISE_EVENT_ID = "riot_risk"
+NOISE_EVENT_IDS = frozenset({"riot_risk", "region_simulated"})
 BLURB_MAX_CHARS = 80
 STEM_PATTERN = "^[A-Za-z0-9._-]+$"
 INDEX_VERSION = 3
@@ -201,6 +201,12 @@ def indexPathFor(logPath: Path) -> Path:
 
 
 def _blurbFromRow(row: dict) -> str:
+  notes = row.get("eventNotes") or []
+  if notes:
+    text = str(notes[0]).strip()
+    if len(text) > BLURB_MAX_CHARS:
+      return text[:BLURB_MAX_CHARS] + "…"
+    return text
   crowd = row.get("crowd") or {}
   behavior = row.get("behavior") or {}
   law = row.get("law") or {}
@@ -213,7 +219,15 @@ def _blurbFromRow(row: dict) -> str:
 
 
 def _visibleEvents(row: dict) -> list[str]:
-  return [str(item) for item in (row.get("events") or []) if item != NOISE_EVENT_ID]
+  notes = row.get("eventNotes")
+  if isinstance(notes, list) and notes:
+    return [
+      str(item)
+      for item in notes
+      if str(item) not in NOISE_EVENT_IDS
+      and not any(str(item).startswith(f"{noise}:") for noise in NOISE_EVENT_IDS)
+    ]
+  return [str(item) for item in (row.get("events") or []) if item not in NOISE_EVENT_IDS]
 
 
 def _rowMetrics(row: dict) -> dict:

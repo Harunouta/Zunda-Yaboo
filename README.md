@@ -14,7 +14,7 @@ GUIなし。通貨制度は CLI の `--standard`（ラジオ相当）で選択�
 
 見て遊ぶ:
 
-- **ブラウザ** … `open_viewer.bat` → `http://127.0.0.1:8765/`（月次画面・短い起動）
+- **ブラウザ** … `open_viewer.bat` → `http://127.0.0.1:8765/`（月次画面・短い起動）。比較用のセリフ無し zip は [`data/redistributable/compare_packs/`](data/redistributable/compare_packs/) を `/compare.html` に載せる。
 - **CUI** … ターミナルで `python scripts/operator_cui.py` または `python scripts/play_run.py --preset …`
 
 手順の本体は [`VIEWING.md`](VIEWING.md)。
@@ -89,7 +89,7 @@ LM Studio 既定: 統治 `qwen3.6-27b`、crowd `qwen2.5-7b-instruct`（詳細 [M
 
 | 区分 | 置き場 |
 |------|--------|
-| 同梱する | `src/`、`scripts/`、`config/`、`data/events/`、`data/redistributable/`、Dockerfile 等 |
+| 同梱する | `src/`、`scripts/`、`config/`、`data/events/`、`data/redistributable/`（セリフ無し compare zip 含む）、Dockerfile 等 |
 | 同梱しない | `data/restricted/` のコーパス（非公開）、`logs/`、`checkpoints/`、モデル重み、Cursor/エージェント用指示（`HANDOFF.md`、`.cursor/` など） |
 
 コードは MIT（[LICENSE](LICENSE)）。ずんだもん／あんこもんは [ずん子ガイドライン](https://zunko.jp/guideline.html) に従う非公式利用で、MIT の対象外です。聖書は公開しません。
