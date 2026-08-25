@@ -373,7 +373,10 @@ class ViewerHandler(BaseHTTPRequestHandler):
       matchEventLog = re.match(r"^/api/runs/([^/]+)/event-log$", path)
       if matchEventLog:
         events = run_log_read.listEventLog(matchEventLog.group(1))
-        status, body, ctype = jsonBytes({"events": events, "count": len(events)})
+        markers = run_log_read.chartMarkersFromRows(events)
+        status, body, ctype = jsonBytes(
+          {"events": events, "markers": markers, "count": len(events)}
+        )
         self._send(status, body, ctype)
         return
       matchMonths = re.match(r"^/api/runs/([^/]+)/months$", path)

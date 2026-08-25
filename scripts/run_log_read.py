@@ -25,6 +25,59 @@ RUNS_DIR = ROOT / "logs" / "runs"
 COMPARE_DIR = ROOT / "logs" / "compare_packs"
 INDEX_PREFIX = ".viewer_index_"
 NOISE_EVENT_IDS = frozenset({"riot_risk", "region_simulated"})
+MAX_CHART_MARKERS = 40
+MAJOR_EVENT_NEEDLES = (
+  "famine",
+  "flood",
+  "earthquake",
+  "eruption",
+  "volcano",
+  "perry",
+  "war_",
+  "_war",
+  "cholera",
+  "covid",
+  "tenmei",
+  "tenpo",
+  "hoei",
+  "tsunami",
+  "typhoon",
+  "kanto",
+  "tohoku",
+  "sakuradamon",
+  "meiji_restoration",
+  "taisei_hokan",
+  "opium",
+  "depression",
+  "shogunate_starts",
+  "hanshin",
+  "atomic",
+  "ww2",
+  "influenza",
+  "pandemic",
+)
+MAJOR_NOTE_NEEDLES = (
+  "飢饉",
+  "噴火",
+  "地震",
+  "津波",
+  "黒船",
+  "条約",
+  "維新",
+  "大戦",
+  "戦争",
+  "洪水",
+  "台風",
+  "コレラ",
+  "疫病",
+  "震災",
+  "恐慌",
+  "開府",
+  "原爆",
+  "空襲",
+  "一揆",
+  "開国",
+)
 BLURB_MAX_CHARS = 80
 STEM_PATTERN = "^[A-Za-z0-9._-]+$"
 INDEX_VERSION = 3
@@ -372,6 +425,100 @@ def listMonths(
   return rows
 
 
+def _splitEventRef(raw: str) -> tuple[str, str]:
+  text = str(raw or "").strip()
+  if ": " in text:
+    eventId, note = text.split(": ", 1)
+    return eventId.strip(), note.strip()
+  return text, ""
+
+
+def _japaneseEventName(eventId: str, packedNote: str = "") -> str:
+  if packedNote:
+    return packedNote
+  from src.events import EVENT_TABLE
+
+  payload = EVENT_TABLE.get(eventId)
+  if payload is None:
+    return eventId
+  notes = str(getattr(payload, "notes", "") or "").strip()
+  if notes:
+    return notes.splitlines()[0][:80]
+  leader = str(getattr(payload, "promptForLeader", "") or "").strip()
+  if leader:
+    parts = [part.strip() for part in leader.split("。") if part.strip()]
+    first = parts[0] if parts else leader
+    if len(first) < 16 and len(parts) > 1:
+      first = f"{parts[0]}。{parts[1]}"
+    return first[:80] + ("…" if len(first) > 80 else "")
+  return eventId
+
+
+def _eventWeight(eventId: str) -> float:
+  from src.events import EVENT_TABLE
+
+  payload = EVENT_TABLE.get(eventId)
+  weight = 0.0
+  lowered = eventId.lower()
+  if any(needle in lowered for needle in MAJOR_EVENT_NEEDLES):
+    weight += 1.5
+  if any(
+    token in lowered
+    for token in ("perry", "meiji_restoration", "shogunate_starts", "sakuradamon", "covid")
+  ):
+    weight += 4.0
+  if payload is None:
+    return weight
+  disaster = getattr(payload, "disasterOverride", None)
+  if disaster is not None:
+    weight += max(0.0, 1.0 - float(disaster)) * 3.0
+  weight += abs(float(getattr(payload, "populationShock", 0.0) or 0.0)) * 80.0
+  weight += abs(float(getattr(payload, "cropLossExtra", 0.0) or 0.0))
+  weight += float(getattr(payload, "epidemicSeverity", 0.0) or 0.0) * 2.0
+  return weight
+
+
+def _isMajorEvent(eventId: str, nameJa: str) -> bool:
+  blob = f"{eventId} {nameJa}".lower()
+  if any(needle in blob for needle in MAJOR_EVENT_NEEDLES):
+    return True
+  return any(needle in nameJa for needle in MAJOR_NOTE_NEEDLES)
+
+
+def chartMarkersFromRows(rows: list[dict]) -> list[dict]:
+  scored: list[dict] = []
+  for row in rows:
+    yearMonth = str(row.get("yearMonth") or "")
+    year = int(yearMonth[:4]) if yearMonth[:4].isdigit() else 0
+    best: dict | None = None
+    for label in row.get("labels") or []:
+      eventId = str(label.get("id") or "")
+      nameJa = str(label.get("nameJa") or eventId)
+      if not _isMajorEvent(eventId, nameJa):
+        continue
+      weight = _eventWeight(eventId)
+      candidate = {
+        "year": year,
+        "yearMonth": yearMonth,
+        "eventId": eventId,
+        "nameJa": nameJa,
+        "weight": weight,
+      }
+      if best is None or weight > best["weight"]:
+        best = candidate
+    if best:
+      scored.append(best)
+  scored.sort(key=lambda item: (-float(item["weight"]), str(item["yearMonth"])))
+  byYear: dict[int, dict] = {}
+  for item in scored:
+    year = int(item["year"])
+    if year not in byYear:
+      byYear[year] = item
+    if len(byYear) >= MAX_CHART_MARKERS:
+      break
+  return [byYear[year] for year in sorted(byYear)]
+
+
 def listEventLog(stem: str) -> list[dict]:
   logPath = resolveRunPath(stem)
   index = loadIndex(logPath)
@@ -380,14 +527,23 @@ def listEventLog(stem: str) -> list[dict]:
     events = item.get("events") or []
     if not events:
       continue
+    labels = []
+    for raw in events:
+      eventId, packedNote = _splitEventRef(str(raw))
+      labels.append({"id": eventId, "nameJa": _japaneseEventName(eventId, packedNote)})
     rows.append(
       {
         "yearMonth": item.get("yearMonth"),
         "events": events,
+        "labels": labels,
         "blurb": item.get("blurb") or "",
       }
     )
   return rows
+
+
+def listChartMarkers(stem: str) -> list[dict]:
+  return chartMarkersFromRows(listEventLog(stem))
 
 
 def readMonth(stem: str, yearMonth: str) -> dict:

@@ -66,3 +66,22 @@
 #eventLog li.yearHit {
   outline: 1px solid var(--accent);
 }
+
+.chartTooltip {
+  position: fixed;
+  z-index: 20;
+  max-width: 320px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #2a2a2c;
+  color: var(--fg);
+  font-size: 12px;
+  line-height: 1.45;
+  pointer-events: none;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+}
+
+canvas {
+  cursor: crosshair;
+}

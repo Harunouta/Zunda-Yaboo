@@ -28,7 +28,8 @@
       <label class="check"><input id="onlySpeech" type="checkbox" /> マスコットがしゃべった月だけ</label>
       <button type="button" id="reloadBtn">読み直す</button>
       <p id="rangeMeta" class="hint"></p>
-      <p class="hint">グラフは年次中央値を色分けして重ねる。凸凹クリックでその年の横断表へ。</p>
+      <p class="hint">グラフは年次中央値。カーソルで数値、大きい出来事は点線と△。△をクリックすると下のイベントログへ。</p>
+      <div id="chartTooltip" class="chartTooltip" hidden></div>
       <h3>人口（年次ざっくり）</h3>
       <canvas id="chartPop" width="960" height="180"></canvas>
       <h3>食/人円（年次中央値）</h3>
