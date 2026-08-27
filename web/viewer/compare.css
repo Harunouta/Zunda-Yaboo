@@ -18,12 +18,40 @@
   border: 1px solid var(--line);
   border-radius: 999px;
   font-size: 12px;
+  cursor: pointer;
 }
 
 .packDot {
   width: 10px;
   height: 10px;
   border-radius: 50%;
+  flex: 0 0 auto;
+}
+
+.packColor {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.packColor::-webkit-color-swatch-wrapper {
+  padding: 1px;
+}
+
+.packColor::-webkit-color-swatch {
+  border: none;
+  border-radius: 2px;
+}
+
+.packName {
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .compareGrid {

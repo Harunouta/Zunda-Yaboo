@@ -22,13 +22,14 @@
         <input id="zipFiles" type="file" accept=".zip,application/zip" multiple />
       </label>
       <p id="loadStatus" class="hint">まだ載せていないのだ</p>
+      <p class="hint">凡例の色は任意に変えられる。既定はずんだ緑・あんこ茶・水色。</p>
       <div id="packLegend" class="packLegend"></div>
       <label class="check"><input id="onlyEvents" type="checkbox" /> イベント月だけ</label>
       <label class="check"><input id="onlyBigChanges" type="checkbox" /> 指標・イベントが大きく変わった月だけ</label>
       <label class="check"><input id="onlySpeech" type="checkbox" /> マスコットがしゃべった月だけ</label>
       <button type="button" id="reloadBtn">読み直す</button>
       <p id="rangeMeta" class="hint"></p>
-      <p class="hint">グラフは年次中央値。カーソルで数値、大きい出来事は点線と△。△をクリックすると下のイベントログへ。</p>
+      <p class="hint">グラフは年次中央値。カーソルで数値。△は zip ごと・グラフごとに、その指標が大きく動いた年のイベント（色＝zip）。△クリックでイベントログへ。</p>
       <div id="chartTooltip" class="chartTooltip" hidden></div>
       <h3>人口（年次ざっくり）</h3>
       <canvas id="chartPop" width="960" height="180"></canvas>

@@ -16,65 +16,19 @@ const CHART_PAD_TOP = 12;
 const CHART_PAD_BOTTOM = 28;
 const CHART_IDS = ["chartPop", "chartFood", "chartFid", "chartPrice"];
 const MAX_COMPARE_RUNS = 6;
-const MAX_CHART_MARKERS = 40;
+const MAX_MARKERS_PER_PACK = 12;
 const MARKER_HIT_PX = 14;
-const RUN_COLORS = ["#4fc1ff", "#ce9178", "#b5cea8", "#dcdcaa", "#c586c0", "#9cdcfe"];
-const MAJOR_EVENT_NEEDLES = [
-  "famine",
-  "flood",
-  "earthquake",
-  "eruption",
-  "volcano",
-  "perry",
-  "war_",
-  "_war",
-  "cholera",
-  "covid",
-  "tenmei",
-  "tenpo",
-  "hoei",
-  "tsunami",
-  "typhoon",
-  "kanto",
-  "tohoku",
-  "sakuradamon",
-  "meiji_restoration",
-  "taisei_hokan",
-  "opium",
-  "depression",
-  "shogunate_starts",
-  "hanshin",
-  "atomic",
-  "ww2",
-  "influenza",
-  "pandemic",
-];
-const MAJOR_NOTE_NEEDLES = [
-  "飢饉",
-  "噴火",
-  "地震",
-  "津波",
-  "黒船",
-  "条約",
-  "維新",
-  "大戦",
-  "戦争",
-  "洪水",
-  "台風",
-  "コレラ",
-  "疫病",
-  "震災",
-  "恐慌",
-  "開府",
-  "原爆",
-  "空襲",
-  "一揆",
-  "開国",
-];
-const RUN_COLORS_MARKER = "#dcdcaa";
+const MARKER_X_SPREAD = 8;
+const SWING_FLOOR = {
+  population: 0.008,
+  foodYen: 0.12,
+  fidelity: 0.04,
+  price: 0.15,
+};
+/* Defaults: zunda green, anko red-brown, then high-contrast on dark bg */
+const RUN_COLORS = ["#8BC34A", "#C45C48", "#5EB3F6", "#E6DB74", "#C586C0", "#9CDCFE"];
 let loadedPacks = [];
 let chartYears = [];
-let chartMarkers = [];
 let chartLayouts = {};
 
 async function fetchJson(url, options) {
@@ -95,14 +49,6 @@ function splitEventRef(raw) {
   return { eventId: text, nameJa: "" };
 }
 
-function isMajorEvent(eventId, nameJa) {
-  const blob = `${eventId} ${nameJa}`.toLowerCase();
-  if (MAJOR_EVENT_NEEDLES.some((needle) => blob.includes(needle))) {
-    return true;
-  }
-  return MAJOR_NOTE_NEEDLES.some((needle) => nameJa.includes(needle));
-}
-
 function labelsFromEventItem(item) {
   if (Array.isArray(item.labels) && item.labels.length) {
     return item.labels.map((label) => ({
@@ -116,42 +62,126 @@ function labelsFromEventItem(item) {
   });
 }
 
-function pickChartMarkers(eventItems, serverMarkers) {
-  if (Array.isArray(serverMarkers) && serverMarkers.length) {
-    return serverMarkers
-      .map((item) => ({
-        year: Number(item.year),
-        yearMonth: String(item.yearMonth || ""),
-        eventId: String(item.eventId || ""),
-        nameJa: String(item.nameJa || item.eventId || ""),
-      }))
-      .filter((item) => Number.isFinite(item.year));
+function swingScore(prev, cur, metricKind) {
+  if (typeof prev !== "number" || typeof cur !== "number") return 0;
+  if (metricKind === "fidelity") {
+    return Math.abs(cur - prev);
   }
-  const scored = [];
+  const denom = Math.max(Math.abs(prev), 1e-9);
+  return Math.abs(cur - prev) / denom;
+}
+
+function eventsByYear(eventItems) {
+  const map = new Map();
   for (const item of eventItems) {
-    const yearMonth = String(item.yearMonth || "");
-    const year = Number(yearMonth.slice(0, 4));
+    const year = Number(String(item.yearMonth || "").slice(0, 4));
     if (!Number.isFinite(year)) continue;
-    for (const label of labelsFromEventItem(item)) {
-      if (!isMajorEvent(label.eventId, label.nameJa)) continue;
-      scored.push({
-        year,
-        yearMonth,
-        eventId: label.eventId,
-        nameJa: label.nameJa,
-        weight: label.nameJa.length,
-      });
+    if (!map.has(year)) map.set(year, []);
+    map.get(year).push(item);
+  }
+  return map;
+}
+
+function pickEventInYear(year, yearItems) {
+  if (!yearItems || !yearItems.length) return null;
+  const sorted = [...yearItems].sort(
+    (left, right) => (right.events || []).length - (left.events || []).length
+  );
+  const item = sorted[0];
+  const labels = labelsFromEventItem(item);
+  const label = labels[0] || { eventId: "event", nameJa: String(year) };
+  return {
+    yearMonth: String(item.yearMonth || `${year}-01`),
+    eventId: label.eventId,
+    nameJa: label.nameJa || label.eventId,
+    packLabel: item.packLabel || "",
+    color: item.color || RUN_COLORS[0],
+  };
+}
+
+function yearSwingScores(years, data, metricKind) {
+  const rows = [];
+  for (let index = 1; index < years.length; index += 1) {
+    const score = swingScore(data[index - 1], data[index], metricKind);
+    if (score <= 0) continue;
+    rows.push({ year: years[index], index, score });
+  }
+  rows.sort((left, right) => right.score - left.score);
+  return rows;
+}
+
+function pickMarkersForPack(years, data, eventItems, pack, metricKind) {
+  const floor = SWING_FLOOR[metricKind] || 0.05;
+  const byYear = eventsByYear(eventItems);
+  const swings = yearSwingScores(years, data, metricKind).filter((row) => row.score >= floor);
+  const markers = [];
+  for (const row of swings) {
+    if (markers.length >= MAX_MARKERS_PER_PACK) break;
+    const picked = pickEventInYear(row.year, byYear.get(row.year));
+    if (!picked) continue;
+    markers.push({
+      year: row.year,
+      yearMonth: picked.yearMonth,
+      eventId: picked.eventId,
+      nameJa: picked.nameJa,
+      packLabel: pack.label,
+      color: pack.color,
+      swing: row.score,
+    });
+  }
+  return markers;
+}
+
+function pickMarkersForPricePack(years, riceData, zundaData, eventItems, pack) {
+  const floor = SWING_FLOOR.price;
+  const byYear = eventsByYear(eventItems);
+  const scoreByYear = new Map();
+  for (let index = 1; index < years.length; index += 1) {
+    const riceSwing = swingScore(riceData[index - 1], riceData[index], "price");
+    const zundaSwing = swingScore(zundaData[index - 1], zundaData[index], "price");
+    const score = Math.max(riceSwing, zundaSwing);
+    if (score >= floor) {
+      scoreByYear.set(years[index], score);
     }
   }
-  scored.sort((left, right) => right.weight - left.weight || left.yearMonth.localeCompare(right.yearMonth));
-  const byYear = new Map();
-  for (const item of scored) {
-    if (!byYear.has(item.year)) {
-      byYear.set(item.year, item);
-    }
-    if (byYear.size >= MAX_CHART_MARKERS) break;
+  const swings = Array.from(scoreByYear.entries())
+    .map(([year, score]) => ({ year, score }))
+    .sort((left, right) => right.score - left.score);
+  const markers = [];
+  for (const row of swings) {
+    if (markers.length >= MAX_MARKERS_PER_PACK) break;
+    const picked = pickEventInYear(row.year, byYear.get(row.year));
+    if (!picked) continue;
+    markers.push({
+      year: row.year,
+      yearMonth: picked.yearMonth,
+      eventId: picked.eventId,
+      nameJa: picked.nameJa,
+      packLabel: pack.label,
+      color: pack.color,
+      swing: row.score,
+    });
   }
-  return Array.from(byYear.values()).sort((left, right) => left.year - right.year);
+  return markers;
+}
+
+function layoutChartMarkers(markers, years, labelCount, plotW) {
+  const yearIndex = new Map(years.map((year, index) => [year, index]));
+  const grouped = new Map();
+  for (const marker of markers || []) {
+    if (!yearIndex.has(marker.year)) continue;
+    if (!grouped.has(marker.year)) grouped.set(marker.year, []);
+    grouped.get(marker.year).push(marker);
+  }
+  const laid = [];
+  for (const [year, group] of grouped) {
+    const baseX = plotX(yearIndex.get(year), labelCount, plotW);
+    group.forEach((marker, offsetIndex) => {
+      const spread = (offsetIndex - (group.length - 1) / 2) * MARKER_X_SPREAD;
+      laid.push({ ...marker, x: baseX + spread });
+    });
+  }
+  return laid.sort((left, right) => left.year - right.year || left.x - right.x);
 }
 
 function plotX(index, labelCount, plotW) {
@@ -198,19 +228,11 @@ function drawLineChart(canvas, labels, seriesList, markers) {
     maxVal = minVal + 1;
     layout.maxVal = maxVal;
   }
-  const yearIndex = new Map(layout.years.map((year, index) => [year, index]));
-  for (const marker of markers || []) {
-    if (!yearIndex.has(marker.year)) continue;
-    const index = yearIndex.get(marker.year);
-    layout.markers.push({
-      ...marker,
-      x: plotX(index, labels.length, plotW),
-    });
-  }
+  layout.markers = layoutChartMarkers(markers, layout.years, labels.length, plotW);
   ctx.save();
   ctx.setLineDash([4, 5]);
-  ctx.strokeStyle = "rgba(220, 220, 170, 0.35)";
   for (const marker of layout.markers) {
+    ctx.strokeStyle = markerColor(marker.color, 0.45);
     ctx.beginPath();
     ctx.moveTo(marker.x, padTop);
     ctx.lineTo(marker.x, padTop + plotH);
@@ -252,9 +274,9 @@ function drawLineChart(canvas, labels, seriesList, markers) {
     ctx.fillStyle = color;
     ctx.fillText(series.name, padLeft + 8 + seriesIndex * 140, padTop + 10);
   });
-  ctx.fillStyle = RUN_COLORS_MARKER;
   for (const marker of layout.markers) {
     const baseY = padTop + plotH;
+    ctx.fillStyle = marker.color || RUN_COLORS[0];
     ctx.beginPath();
     ctx.moveTo(marker.x, baseY - 8);
     ctx.lineTo(marker.x - 5, baseY + 2);
@@ -263,6 +285,16 @@ function drawLineChart(canvas, labels, seriesList, markers) {
     ctx.fill();
   }
   chartLayouts[canvas.id] = layout;
+}
+
+function markerColor(hex, alpha) {
+  if (!hex || !hex.startsWith("#") || hex.length < 7) {
+    return `rgba(220, 220, 170, ${alpha})`;
+  }
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
 function unionYears(seriesPayloads) {
@@ -283,12 +315,53 @@ function alignSeries(years, seriesYears, values) {
   return years.map((year) => (map.has(year) ? map.get(year) : null));
 }
 
+function normalizeHexColor(value, fallback) {
+  const raw = String(value || "").trim();
+  if (/^#[0-9A-Fa-f]{6}$/.test(raw)) return raw.toUpperCase();
+  if (/^#[0-9A-Fa-f]{3}$/.test(raw)) {
+    return `#${raw[1]}${raw[1]}${raw[2]}${raw[2]}${raw[3]}${raw[3]}`.toUpperCase();
+  }
+  return String(fallback || RUN_COLORS[0]).toUpperCase();
+}
+
+function setPackColor(packIndex, color) {
+  const pack = loadedPacks[packIndex];
+  if (!pack) return;
+  pack.color = normalizeHexColor(color, pack.color);
+  renderLegend();
+  renderCompare().catch((error) => {
+    rangeMeta.textContent = String(error.message || error);
+  });
+}
+
 function renderLegend() {
   packLegend.innerHTML = "";
-  loadedPacks.forEach((pack) => {
-    const chip = document.createElement("span");
+  loadedPacks.forEach((pack, packIndex) => {
+    const chip = document.createElement("label");
     chip.className = "packChip";
-    chip.innerHTML = `<span class="packDot" style="background:${pack.color}"></span>${pack.label}`;
+    const picker = document.createElement("input");
+    picker.type = "color";
+    picker.className = "packColor";
+    picker.value = normalizeHexColor(pack.color, RUN_COLORS[packIndex % RUN_COLORS.length]);
+    picker.title = `${pack.label} の色`;
+    picker.setAttribute("aria-label", `${pack.label} の色`);
+    picker.addEventListener("input", () => {
+      pack.color = normalizeHexColor(picker.value, pack.color);
+      const dot = chip.querySelector(".packDot");
+      if (dot) dot.style.background = pack.color;
+    });
+    picker.addEventListener("change", () => {
+      setPackColor(packIndex, picker.value);
+    });
+    const dot = document.createElement("span");
+    dot.className = "packDot";
+    dot.style.background = pack.color;
+    const name = document.createElement("span");
+    name.className = "packName";
+    name.textContent = pack.label;
+    chip.appendChild(picker);
+    chip.appendChild(dot);
+    chip.appendChild(name);
     packLegend.appendChild(chip);
   });
 }
@@ -375,7 +448,7 @@ async function loadZipFiles(fileList) {
     packs.push({
       stem: data.stem,
       label: data.label || file.name.replace(/\.zip$/i, ""),
-      color: RUN_COLORS[index % RUN_COLORS.length],
+      color: normalizeHexColor(RUN_COLORS[index % RUN_COLORS.length]),
       standard: data.standard,
       span: data.span,
       hasRecap: data.hasRecap,
@@ -385,6 +458,15 @@ async function loadZipFiles(fileList) {
   renderLegend();
   loadStatus.textContent = `${packs.length} 本を載せたのだ`;
   await renderCompare();
+}
+
+function packEventItems(eventPayload, pack) {
+  return (eventPayload.events || []).map((item) => ({
+    ...item,
+    packLabel: pack.label,
+    color: pack.color,
+    stem: pack.stem,
+  }));
 }
 
 async function renderCompare() {
@@ -399,16 +481,51 @@ async function renderCompare() {
   chartYears = years;
   const labels = years.map(String);
   const mergedEvents = [];
-  const serverMarkers = [];
-  eventPayloads.forEach((payload, index) => {
-    for (const item of payload.events || []) {
-      mergedEvents.push({ ...item, packLabel: loadedPacks[index].label, color: loadedPacks[index].color });
-    }
-    for (const marker of payload.markers || []) {
-      serverMarkers.push(marker);
-    }
+  const popMarkers = [];
+  const foodMarkers = [];
+  const fidMarkers = [];
+  const priceMarkers = [];
+  loadedPacks.forEach((pack, index) => {
+    const events = packEventItems(eventPayloads[index], pack);
+    mergedEvents.push(...events);
+    const series = seriesPayloads[index].series || {};
+    popMarkers.push(
+      ...pickMarkersForPack(
+        years,
+        alignSeries(years, series.years, series.population || []),
+        events,
+        pack,
+        "population"
+      )
+    );
+    foodMarkers.push(
+      ...pickMarkersForPack(
+        years,
+        alignSeries(years, series.years, series.foodYen || []),
+        events,
+        pack,
+        "foodYen"
+      )
+    );
+    fidMarkers.push(
+      ...pickMarkersForPack(
+        years,
+        alignSeries(years, series.years, series.fidelity || []),
+        events,
+        pack,
+        "fidelity"
+      )
+    );
+    priceMarkers.push(
+      ...pickMarkersForPricePack(
+        years,
+        alignSeries(years, series.years, series.ricePrice || []),
+        alignSeries(years, series.years, series.zundaPrice || []),
+        events,
+        pack
+      )
+    );
   });
-  chartMarkers = pickChartMarkers(mergedEvents, serverMarkers);
   drawLineChart(
     document.getElementById("chartPop"),
     labels,
@@ -417,7 +534,7 @@ async function renderCompare() {
       color: pack.color,
       data: alignSeries(years, seriesPayloads[index].series.years, seriesPayloads[index].series.population || []),
     })),
-    chartMarkers
+    popMarkers
   );
   drawLineChart(
     document.getElementById("chartFood"),
@@ -427,7 +544,7 @@ async function renderCompare() {
       color: pack.color,
       data: alignSeries(years, seriesPayloads[index].series.years, seriesPayloads[index].series.foodYen || []),
     })),
-    chartMarkers
+    foodMarkers
   );
   drawLineChart(
     document.getElementById("chartFid"),
@@ -437,7 +554,7 @@ async function renderCompare() {
       color: pack.color,
       data: alignSeries(years, seriesPayloads[index].series.years, seriesPayloads[index].series.fidelity || []),
     })),
-    chartMarkers
+    fidMarkers
   );
   const priceSeries = [];
   loadedPacks.forEach((pack, index) => {
@@ -452,7 +569,7 @@ async function renderCompare() {
       data: alignSeries(years, seriesPayloads[index].series.years, seriesPayloads[index].series.zundaPrice || []),
     });
   });
-  drawLineChart(document.getElementById("chartPrice"), labels, priceSeries, chartMarkers);
+  drawLineChart(document.getElementById("chartPrice"), labels, priceSeries, priceMarkers);
   rangeMeta.textContent = loadedPacks
     .map((pack, index) => {
       const payload = seriesPayloads[index];
@@ -692,7 +809,9 @@ function bindChartPointer() {
       const year = layout.years[index];
       const lines = [`<strong>${year}</strong>`];
       if (marker) {
-        lines.push(`${marker.yearMonth} ${marker.nameJa || marker.eventId}`);
+        lines.push(
+          `<span style="color:${marker.color}">${marker.packLabel || ""}</span> ${marker.yearMonth} ${marker.nameJa || marker.eventId}`
+        );
       }
       layout.seriesList.forEach((series) => {
         lines.push(`${series.name}: ${formatTipNumber(series.data[index])}`);
