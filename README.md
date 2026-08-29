@@ -10,7 +10,7 @@ GUIなし。通貨制度は CLI の `--standard`（ラジオ相当）で選択�
 - **非公式です。** 東北ずん子・ずんだもんプロジェクト、その他いかなる公式とは無関係です。
 - **フィクション用のシミュレーションプログラムです。** 学術論文・報道・防災・投資・歴史教育の一次資料ではありません。
 - 飢饉・洪水・疫病・戦争などの出来事の説明は、Wikipedia 等の二次情報と LLM の推論を混ぜたものです。**事実と一致するかは検証していません。** 史実と一致するように設計してもいません。
-- ずんだもん／あんこもんの詳細コーパス（聖書）はこのリポジトリでは**非公開**です。無くても短いフォールバックで動きます。
+- ずんだもん／あんこもんの詳細コーパスはこのリポジトリでは**非公開**です。無くても短いフォールバックで動きます。
 
 見て遊ぶ:
 
@@ -69,7 +69,7 @@ python -m src.main --no-llm --standard edo_metal --historical-policy --start 160
 | `edo_metal` | なし |
 | `dollar` | なし |
 
-詳細コーパス（ずんだもん／あんこもんの聖書）は **非公開**です。このリポジトリにも、公開ダウンロード先にも置きません。手元にある場合のみ `data/restricted/` へ（[手順](data/restricted/README.md)）。無い場合は短いフォールバックで動作します。  
+ずんだもん／あんこもん向けの詳細コーパス（ペルソナ用テキスト）は **非公開**です。このリポジトリにも、公開ダウンロード先にも置きません。手元にある場合のみ `data/restricted/` へ（[手順](data/restricted/README.md)）。無い場合は短いフォールバックで動作します。  
 キャラクターの利用は [ずん子ガイドライン](https://zunko.jp/guideline.html) に従う想定です。
 
 毎月のログ `crowd.mascotId` / `crowd.mascotSpeech` に口調つき発話が入ります。
@@ -80,21 +80,6 @@ LM Studio 既定: 統治 `qwen3.6-27b`、crowd `qwen2.5-7b-instruct`（詳細 [M
 27B と別の大モデルを同時 Load すると `terminated` になりやすいので、crowd は 7B を推奨。
 
 月次のどこが数式でどこが LLM かは [docs/RULES_VS_LLM.md](docs/RULES_VS_LLM.md)。農の三角・政策カード・オピニオン伝播などの図は [docs/INTERNALS.md](docs/INTERNALS.md)。
-
-## GitHub
-
-リモート: [Harunouta/Zunda-Yaboo](https://github.com/Harunouta/Zunda-Yaboo)（公開時は GitHub の Visibility を public に切り替えてください）。
-
-再配布の切り分けは **[REDISTRIBUTION.md](REDISTRIBUTION.md)** と **[licenses/THIRD_PARTY.md](licenses/THIRD_PARTY.md)**。
-
-| 区分 | 置き場 |
-|------|--------|
-| 同梱する | `src/`、`scripts/`、`config/`、`data/events/`、`data/redistributable/`（セリフ無し compare zip 含む）、Dockerfile 等 |
-| 同梱しない | `data/restricted/` のコーパス（非公開）、`logs/`、`checkpoints/`、モデル重み、ローカル作業メモ（`HANDOFF.md`、`.cursor/` など） |
-
-コードは MIT（[LICENSE](LICENSE)）。ずんだもん／あんこもんは [ずん子ガイドライン](https://zunko.jp/guideline.html) に従う非公式利用で、MIT の対象外です。聖書は公開しません。
-
-Excel からの再取込は `--xlsx` でワークブックを指定する（未指定時は環境変数 `ZUNDA_EVENTS_XLSX`、詳細は各 `import_*.py --help`）。リポジトリにはシート本体を入れません。
 
 ## 前提
 
