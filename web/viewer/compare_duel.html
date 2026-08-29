@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Zunda-Yaboo ずんパラ対決比較</title>
+  <link rel="stylesheet" href="/app.css" />
+  <link rel="stylesheet" href="/compare.css" />
+  <link rel="stylesheet" href="/compare_duel.css" />
+</head>
+<body>
+  <header class="top">
+    <h1>ずんパラ対決比較</h1>
+    <p class="sub">
+      2 本の duel zip（世論＋農業、マスコットなし）を載せる。<strong>重なっている年月だけ</strong>表示。
+      公開用 UI — サンプル zip は <code>data/redistributable/duel_packs/</code>。
+      <a href="/compare.html">統計 compare へ</a> · <a href="/">本閲覧へ</a>
+    </p>
+  </header>
+  <main class="compareMain duelMain">
+    <section class="pane">
+      <h2>2 本の duel zip</h2>
+      <label>左＝ずんだ側 · 右＝あんこ側（順不同可）
+        <input id="duelZipFiles" type="file" accept=".zip,application/zip" multiple />
+      </label>
+      <p id="duelLoadStatus" class="hint">2 本選んでください</p>
+      <p id="duelOverlapMeta" class="duelOverlapBanner hint"></p>
+      <div id="duelPackLegend" class="packLegend"></div>
+      <label class="check"><input id="duelOnlyEvents" type="checkbox" /> イベント月だけ（月リスト）</label>
+      <label class="check"><input id="duelOnlyBigChanges" type="checkbox" /> 指標が大きく変わった月だけ</label>
+      <button type="button" id="duelReloadBtn">読み直す</button>
+      <p id="duelRangeMeta" class="hint"></p>
+
+      <h3>レイヤー1 — 数字（重なり期間）</h3>
+      <p class="hint">グラフは両ランが重なる年だけ。下の「乖離月」から世論・農業へ。</p>
+      <div id="duelChartTooltip" class="chartTooltip" hidden></div>
+      <canvas id="duelChartPop" width="960" height="160"></canvas>
+      <canvas id="duelChartFood" width="960" height="160"></canvas>
+      <canvas id="duelChartPrice" width="960" height="180"></canvas>
+
+      <h3>同じ事件、別の地獄 — 乖離月</h3>
+      <p class="hint">イベントがあり、人口・食/人円・主貨/米の乖離が大きい順（最大 40 件）。</p>
+      <ol id="duelDivergenceList" class="duelDivergenceList"></ol>
+
+      <h3>月を選ぶ（重なりのみ）</h3>
+      <ul id="duelMonthList" class="duelMonthList"></ul>
+
+      <div id="duelDetail" class="duelDetail" hidden>
+        <h3 id="duelDetailTitle">月の詳細</h3>
+        <div id="duelMacroGrid" class="compareGrid"></div>
+        <h4>レイヤー3-A — 世論 5 人</h4>
+        <div id="duelOpinionTable" class="duelOpinionTable"></div>
+        <h4>レイヤー3-B — 農業（地域×同年月）</h4>
+        <div id="duelAgriGrid" class="duelAgriGrid"></div>
+      </div>
+    </section>
+  </main>
+  <script src="/compare_duel.js"></script>
+</body>
+</html>

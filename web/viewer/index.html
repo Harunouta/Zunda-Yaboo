@@ -9,7 +9,10 @@
 <body>
   <header class="top">
     <h1>Zunda-Yaboo ローカル閲覧</h1>
-    <p class="sub">127.0.0.1 のみ。エンジンは読まない。JSONL を見る／短い dry-run を投げる。 <a href="/compare.html">書き出した zip を並べて比較</a></p>
+    <p class="sub">127.0.0.1 のみ。エンジンは読まない。JSONL を見る／短い dry-run を投げる。
+      <a href="/compare.html">統計 compare</a> ·
+      <a href="/compare_duel.html">ずんパラ対決 compare</a>
+    </p>
   </header>
   <main class="layout">
     <section class="pane" id="launchPane">
@@ -94,11 +97,13 @@
       </label>
       <div class="runActions">
         <button type="button" id="exportBtn">このランを zip で出す</button>
+        <button type="button" id="exportSpeechBtn">セリフだけ zip</button>
+        <button type="button" id="exportDebugBtn">LLM デバッグ zip</button>
         <label class="filePick">取り込む
           <input id="importFile" type="file" accept=".zip,.jsonl,application/zip" />
         </label>
       </div>
-      <p class="hint">一覧は更新が新しい順。zip には monthly.jsonl とあれば launch.json・総括が入る。衝突する名前は `_imported_日時` になる。</p>
+      <p class="hint">一覧は更新が新しい順。フル zip には monthly.jsonl とあれば launch.json・総括が入る。セリフ zip は布告・マスコット・世論・農 rumor など。デバッグ zip はプロンプト全文（巨大）。いずれも手元用。</p>
       <label class="check"><input id="onlyEvents" type="checkbox" /> イベント月だけ</label>
       <label class="check"><input id="onlyBigChanges" type="checkbox" /> 指標・イベントが大きく変わった月だけ</label>
       <label class="check"><input id="onlySpeech" type="checkbox" /> マスコットがしゃべった月だけ</label>
@@ -115,8 +120,8 @@
       <h3>fidelity</h3>
       <p class="hint">史実アンカーとの近さ（1に近いほど一致）。誤差は米の対数差×0.35＋金銀比×0.25＋正統性×0.20＋人口指数×0.20。score＝max(0, 1−誤差)。historical ラン向け。</p>
       <canvas id="chartFid" width="720" height="160"></canvas>
-      <h3>米・ずんだ価格（sim）</h3>
-      <p class="hint">シミュ内部の相対価格。米 1.0 をだいたい米1kg相当として、ずんだはそこからの掛け算。現代円は PPP 側。</p>
+      <h3 id="chartPriceTitle">米・主貨価格（sim）</h3>
+      <p id="chartPriceHint" class="hint">シミュ内部の相対価格。米 1.0 をだいたい米1kg相当として、主貨（ずんだ／あんこ／小豆）はランの本位に合わせて出す。現代円は PPP 側。</p>
       <canvas id="chartPrice" width="720" height="180"></canvas>
       <h3>期間の総括</h3>
       <p class="hint">走り終わると、マスコット（いなければ市井の人）が期間全体の暮らしを長く振り返ります。係数は変えません。</p>

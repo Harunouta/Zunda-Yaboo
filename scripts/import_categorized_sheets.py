@@ -22,8 +22,6 @@ from openpyxl import load_workbook
 ROOT = Path(__file__).resolve().parents[1]
 ENV_XLSX = "ZUNDA_EVENTS_XLSX"
 DEFAULT_XLSX_NAMES = (
-  "categorized_events (2).xlsx",
-  "categorized_events (1).xlsx",
   "categorized_events.xlsx",
 )
 JAPAN = ROOT / "data" / "events" / "japan"
@@ -804,7 +802,7 @@ def parseArgs() -> argparse.Namespace:
   parser.add_argument(
     "--xlsx",
     default=None,
-    help=f"Workbook path (else {ENV_XLSX}, else ~/Downloads categorized_events*.xlsx)",
+    help=f"Workbook path (else env {ENV_XLSX}, else default search paths; see script source)",
   )
   return parser.parse_args()
 

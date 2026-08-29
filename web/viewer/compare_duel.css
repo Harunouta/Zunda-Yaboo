@@ -1,0 +1,143 @@
+.duelMain {
+  max-width: 1120px;
+}
+
+.duelOverlapBanner {
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #2a2d2e;
+  margin: 10px 0;
+}
+
+.duelDivergenceList {
+  margin: 8px 0 20px;
+  padding-left: 1.2rem;
+  font-size: 13px;
+}
+
+.duelDivergenceList li {
+  margin: 6px 0;
+}
+
+.duelDivergenceList button {
+  all: unset;
+  cursor: pointer;
+  color: var(--link);
+  text-decoration: underline;
+}
+
+.duelMonthList {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 24px;
+  max-height: 320px;
+  overflow-y: auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.duelMonthList .monthRow {
+  width: 100%;
+  text-align: left;
+  padding: 8px 12px;
+  border: none;
+  border-bottom: 1px solid var(--line);
+  background: #252526;
+  color: inherit;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.duelMonthList li.open .monthRow {
+  background: #333337;
+}
+
+.duelMonthList li:last-child .monthRow {
+  border-bottom: none;
+}
+
+.duelDetail {
+  border-top: 2px solid var(--line);
+  padding-top: 16px;
+  margin-top: 8px;
+}
+
+.duelOpinionTable {
+  overflow-x: auto;
+  margin: 10px 0 20px;
+}
+
+.duelOpinionTable table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.duelOpinionTable th,
+.duelOpinionTable td {
+  border: 1px solid var(--line);
+  padding: 8px 10px;
+  vertical-align: top;
+}
+
+.duelOpinionTable th {
+  background: #2a2d2e;
+  text-align: left;
+}
+
+.duelOpinionTable .intentBadge {
+  display: inline-block;
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  margin-bottom: 4px;
+  background: #3c3c3c;
+}
+
+.duelAgriGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 900px) {
+  .duelAgriGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.duelAgriArea {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: #252526;
+}
+
+.duelAgriArea h5 {
+  margin: 0 0 8px;
+  font-size: 13px;
+}
+
+.duelAgriRole {
+  margin: 8px 0;
+  font-size: 12px;
+  border-top: 1px dashed var(--line);
+  padding-top: 6px;
+}
+
+.duelAgriRole:first-of-type {
+  border-top: none;
+  padding-top: 0;
+}
+
+.duelAgriRole .roleLabel {
+  font-weight: 600;
+  color: #9cdcfe;
+}
+
+.duelMacroGrid .macroDelta {
+  font-size: 11px;
+  color: #ce9178;
+}

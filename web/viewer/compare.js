@@ -27,9 +27,40 @@ const SWING_FLOOR = {
 };
 /* Defaults: zunda green, anko red-brown, then high-contrast on dark bg */
 const RUN_COLORS = ["#8BC34A", "#C45C48", "#5EB3F6", "#E6DB74", "#C586C0", "#9CDCFE"];
+const PRIMARY_PRICE_BY_STANDARD = {
+  zunda: { field: "zundaPrice", labelJa: "ずんだ" },
+  anko: { field: "ankoPrice", labelJa: "あんこ" },
+  azuki: { field: "azukiPrice", labelJa: "小豆" },
+};
+const DEFAULT_PRIMARY_PRICE = PRIMARY_PRICE_BY_STANDARD.zunda;
 let loadedPacks = [];
 let chartYears = [];
 let chartLayouts = {};
+
+function primaryPriceSpec(standard) {
+  const key = String(standard || "").toLowerCase();
+  return PRIMARY_PRICE_BY_STANDARD[key] || DEFAULT_PRIMARY_PRICE;
+}
+
+function dominantStandardFromSeries(seriesPayload) {
+  const counts = seriesPayload && seriesPayload.standards;
+  if (!counts || typeof counts !== "object") return "";
+  let best = "";
+  let bestCount = -1;
+  for (const [name, count] of Object.entries(counts)) {
+    const n = Number(count) || 0;
+    if (n > bestCount) {
+      bestCount = n;
+      best = String(name);
+    }
+  }
+  return best;
+}
+
+function resolvePackStandard(pack, seriesPayload) {
+  if (pack && pack.standard) return String(pack.standard);
+  return dominantStandardFromSeries(seriesPayload) || "zunda";
+}
 
 async function fetchJson(url, options) {
   const response = await fetch(url, options);
@@ -132,14 +163,14 @@ function pickMarkersForPack(years, data, eventItems, pack, metricKind) {
   return markers;
 }
 
-function pickMarkersForPricePack(years, riceData, zundaData, eventItems, pack) {
+function pickMarkersForPricePack(years, riceData, primaryData, eventItems, pack) {
   const floor = SWING_FLOOR.price;
   const byYear = eventsByYear(eventItems);
   const scoreByYear = new Map();
   for (let index = 1; index < years.length; index += 1) {
     const riceSwing = swingScore(riceData[index - 1], riceData[index], "price");
-    const zundaSwing = swingScore(zundaData[index - 1], zundaData[index], "price");
-    const score = Math.max(riceSwing, zundaSwing);
+    const primarySwing = swingScore(primaryData[index - 1], primaryData[index], "price");
+    const score = Math.max(riceSwing, primarySwing);
     if (score >= floor) {
       scoreByYear.set(years[index], score);
     }
@@ -516,11 +547,12 @@ async function renderCompare() {
         "fidelity"
       )
     );
+    const priceSpec = primaryPriceSpec(resolvePackStandard(pack, seriesPayloads[index]));
     priceMarkers.push(
       ...pickMarkersForPricePack(
         years,
         alignSeries(years, series.years, series.ricePrice || []),
-        alignSeries(years, series.years, series.zundaPrice || []),
+        alignSeries(years, series.years, series[priceSpec.field] || []),
         events,
         pack
       )
@@ -557,18 +589,33 @@ async function renderCompare() {
     fidMarkers
   );
   const priceSeries = [];
+  const priceLabels = [];
   loadedPacks.forEach((pack, index) => {
+    const payload = seriesPayloads[index];
+    const series = payload.series || {};
+    const priceSpec = primaryPriceSpec(resolvePackStandard(pack, payload));
+    priceLabels.push(`${pack.label}=${priceSpec.labelJa}`);
     priceSeries.push({
       name: `${pack.label} 米`,
       color: pack.color,
-      data: alignSeries(years, seriesPayloads[index].series.years, seriesPayloads[index].series.ricePrice || []),
+      data: alignSeries(years, series.years, series.ricePrice || []),
     });
     priceSeries.push({
-      name: `${pack.label} ずんだ`,
+      name: `${pack.label} ${priceSpec.labelJa}`,
       color: pack.color,
-      data: alignSeries(years, seriesPayloads[index].series.years, seriesPayloads[index].series.zundaPrice || []),
+      data: alignSeries(years, series.years, series[priceSpec.field] || []),
     });
   });
+  const priceTitle = document.getElementById("chartPriceTitle");
+  const priceHint = document.getElementById("chartPriceHint");
+  if (priceTitle) {
+    priceTitle.textContent = "米・主貨価格（sim）";
+  }
+  if (priceHint) {
+    priceHint.textContent = priceLabels.length
+      ? `各ランの本位に合わせた主貨。${priceLabels.join(" / ")}`
+      : "各ランの本位に合わせて主貨（ずんだ／あんこ／小豆）を出す。米は共通。";
+  }
   drawLineChart(document.getElementById("chartPrice"), labels, priceSeries, priceMarkers);
   rangeMeta.textContent = loadedPacks
     .map((pack, index) => {
@@ -651,12 +698,14 @@ function fillMonthColumn(host, data, pack) {
     return;
   }
   const dl = document.createElement("dl");
+  const priceSpec = primaryPriceSpec(data.standard || pack.standard);
+  const prices = data.prices || {};
   const rows = [
     ["events", (data.events || []).join(" / ")],
     ["population", data.population],
     ["foodYen", data.purchasingPower && data.purchasingPower.foodYenPerCapita],
     ["fidelity", data.fidelity],
-    ["rice / zunda", `${(data.prices || {}).ricePrice} / ${(data.prices || {}).zundaPrice}`],
+    [`rice / ${priceSpec.labelJa}`, `${prices.ricePrice} / ${prices[priceSpec.field]}`],
   ];
   for (const [label, value] of rows) {
     const dt = document.createElement("dt");
@@ -835,22 +884,36 @@ function bindChartPointer() {
   }
 }
 
-zipFiles.addEventListener("change", () => {
-  loadZipFiles(zipFiles.files).catch((error) => {
-    loadStatus.textContent = String(error.message || error);
+if (zipFiles) {
+  zipFiles.addEventListener("change", () => {
+    loadZipFiles(zipFiles.files).catch((error) => {
+      loadStatus.textContent = String(error.message || error);
+    });
   });
-});
-document.getElementById("reloadBtn").addEventListener("click", () => {
-  renderCompare().catch((error) => {
-    rangeMeta.textContent = String(error.message || error);
+}
+const reloadBtn = document.getElementById("reloadBtn");
+if (reloadBtn) {
+  reloadBtn.addEventListener("click", () => {
+    renderCompare().catch((error) => {
+      rangeMeta.textContent = String(error.message || error);
+    });
   });
-});
-onlyEvents.addEventListener("change", () => renderCompare().catch(() => {}));
-onlyBigChanges.addEventListener("change", () => renderCompare().catch(() => {}));
-onlySpeech.addEventListener("change", () => renderCompare().catch(() => {}));
-document.getElementById("yearTraceBtn").addEventListener("click", () => {
-  loadYearTrace().catch((error) => {
-    rangeMeta.textContent = String(error.message || error);
+}
+if (onlyEvents) {
+  onlyEvents.addEventListener("change", () => renderCompare().catch(() => {}));
+}
+if (onlyBigChanges) {
+  onlyBigChanges.addEventListener("change", () => renderCompare().catch(() => {}));
+}
+if (onlySpeech) {
+  onlySpeech.addEventListener("change", () => renderCompare().catch(() => {}));
+}
+const yearTraceBtn = document.getElementById("yearTraceBtn");
+if (yearTraceBtn) {
+  yearTraceBtn.addEventListener("click", () => {
+    loadYearTrace().catch((error) => {
+      rangeMeta.textContent = String(error.message || error);
+    });
   });
-});
+}
 bindChartPointer();

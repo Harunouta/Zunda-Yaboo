@@ -1,6 +1,6 @@
 # Docs index (Zunda-Yaboo)
 
-公開ドキュメントの入口。Cursor / エージェント用の `HANDOFF.md` や `.cursor/` はこの一覧に含めません。
+公開ドキュメントの入口。ローカル作業メモ（`HANDOFF.md`、`.cursor/` など）はこの一覧に含めません。
 
 | 優先 | ファイル | 内容 |
 |:----:|----------|------|
@@ -15,3 +15,4 @@
 | 9 | [`INTERNALS.md`](INTERNALS.md) | 農三角・政策 kit・オピニオン・メディエータ・モデル配線 |
 | 10 | [`REDISTRIBUTION.md`](../REDISTRIBUTION.md) | 公開切り分け |
 | 11 | [`DOLLAR_STANDARD.md`](../DOLLAR_STANDARD.md) | ドル本位 |
+| — | [`ZUNPARA_COMPARE_PLAN.md`](ZUNPARA_COMPARE_PLAN.md) | ずんパラ対決（2ラン重なりビューア） |

@@ -6,7 +6,7 @@ CLI: `--standard azuki`
 
 - マスコットは **あんこもん**（`anko` と同じ）
 - `--historical-policy` は江戸金属専用のまま
-- 餡市場（`ankoPrice`）は watching 用に細く残す。本位の価格は `azukiPrice`
+- 餡市場（`ankoPrice`）は参考表示用に細く残す。本位の価格は `azukiPrice`
 
 ```powershell
 python -m src.main --no-llm --standard azuki --start 1603-01 --end 1604-12 --opinion-leaders 0 --log logs/runs/smoke_azuki_1603_1604.jsonl

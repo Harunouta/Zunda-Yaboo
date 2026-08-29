@@ -331,6 +331,30 @@ class ViewerHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(zipBody)
         return
+      matchSpeechExport = re.match(r"^/api/runs/([^/]+)/export-speech$", path)
+      if matchSpeechExport:
+        stem = matchSpeechExport.group(1)
+        zipBody = run_log_read.exportSpeechZip(stem)
+        self.send_response(200)
+        self.send_header("Content-Type", "application/zip")
+        self.send_header("Content-Length", str(len(zipBody)))
+        self.send_header("Content-Disposition", f'attachment; filename="{stem}_speech.zip"')
+        self.send_header("Cache-Control", "no-store")
+        self.end_headers()
+        self.wfile.write(zipBody)
+        return
+      matchDebugExport = re.match(r"^/api/runs/([^/]+)/export-debug$", path)
+      if matchDebugExport:
+        stem = matchDebugExport.group(1)
+        zipBody = run_log_read.exportDebugZip(stem)
+        self.send_response(200)
+        self.send_header("Content-Type", "application/zip")
+        self.send_header("Content-Length", str(len(zipBody)))
+        self.send_header("Content-Disposition", f'attachment; filename="{stem}_debug.zip"')
+        self.send_header("Cache-Control", "no-store")
+        self.end_headers()
+        self.wfile.write(zipBody)
+        return
       if path == "/api/job":
         status, body, ctype = jsonBytes(jobSnapshot())
         self._send(status, body, ctype)

@@ -25,7 +25,7 @@
 
 ```powershell
 python scripts/smoke_founding.py
-python -m src.main --no-llm --standard zunda --start 1782-01 --end 1787-08 --opinion-leaders 5 --log logs/runs/tonight_multiregion_tenmei.jsonl
+python -m src.main --no-llm --standard zunda --start 1782-01 --end 1787-08 --opinion-leaders 5 --log logs/runs/smoke_multiregion_tenmei.jsonl
 ```
 
 Example (multi-region dry-run): **1786-06** tohoku → **1786-08** edo (+tohoku).

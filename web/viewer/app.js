@@ -30,7 +30,40 @@ const CHART_IDS = ["chartPop", "chartFood", "chartFid", "chartPrice"];
 const SEC_PER_MINUTE = 60;
 const SEC_PER_HOUR = 3600;
 const SEC_PER_DAY = 86400;
+const PRIMARY_PRICE_BY_STANDARD = {
+  zunda: { field: "zundaPrice", labelJa: "ずんだ" },
+  anko: { field: "ankoPrice", labelJa: "あんこ" },
+  azuki: { field: "azukiPrice", labelJa: "小豆" },
+};
+const DEFAULT_PRIMARY_PRICE = PRIMARY_PRICE_BY_STANDARD.zunda;
+const PRICE_PAIR_HINT = "sim 相対価格。米1.0 ≒ 1kg相当。主貨はラン／その月の本位。円は PPP 側。";
 let cachedRuns = [];
+
+function primaryPriceSpec(standard) {
+  const key = String(standard || "").toLowerCase();
+  return PRIMARY_PRICE_BY_STANDARD[key] || DEFAULT_PRIMARY_PRICE;
+}
+
+function dominantStandardFromSeries(seriesPayload) {
+  const counts = seriesPayload && seriesPayload.standards;
+  if (!counts || typeof counts !== "object") return "";
+  let best = "";
+  let bestCount = -1;
+  for (const [name, count] of Object.entries(counts)) {
+    const n = Number(count) || 0;
+    if (n > bestCount) {
+      bestCount = n;
+      best = String(name);
+    }
+  }
+  return best;
+}
+
+function resolveRunStandard(stem, seriesPayload) {
+  const run = cachedRuns.find((item) => item.stem === stem);
+  if (run && run.standard) return String(run.standard);
+  return dominantStandardFromSeries(seriesPayload) || "zunda";
+}
 
 async function fetchJson(url, options) {
   const response = await fetch(url, options);
@@ -167,10 +200,10 @@ async function loadRuns(preferredStem) {
   renderRunList();
 }
 
-async function exportCurrentRun() {
+async function downloadRunZip(pathSuffix, downloadName) {
   const stem = runSelect.value;
   if (!stem) return;
-  const response = await fetch(`/api/runs/${encodeURIComponent(stem)}/export`);
+  const response = await fetch(`/api/runs/${encodeURIComponent(stem)}/${pathSuffix}`);
   if (!response.ok) {
     let message = response.statusText;
     try {
@@ -185,11 +218,29 @@ async function exportCurrentRun() {
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
-  link.download = `${stem}.zip`;
+  link.download = downloadName;
   document.body.appendChild(link);
   link.click();
   link.remove();
   URL.revokeObjectURL(url);
+}
+
+async function exportCurrentRun() {
+  const stem = runSelect.value;
+  if (!stem) return;
+  await downloadRunZip("export", `${stem}.zip`);
+}
+
+async function exportSpeechRun() {
+  const stem = runSelect.value;
+  if (!stem) return;
+  await downloadRunZip("export-speech", `${stem}_speech.zip`);
+}
+
+async function exportDebugRun() {
+  const stem = runSelect.value;
+  if (!stem) return;
+  await downloadRunZip("export-debug", `${stem}_debug.zip`);
 }
 
 async function importRunFile(file) {
@@ -227,9 +278,23 @@ async function loadView() {
   drawLineChart(document.getElementById("chartFid"), labels, [
     { name: "fidelity", data: series.series.fidelity || [] },
   ]);
+  const runStandard = resolveRunStandard(stem, series);
+  const priceSpec = primaryPriceSpec(runStandard);
+  const priceTitle = document.getElementById("chartPriceTitle");
+  const priceHint = document.getElementById("chartPriceHint");
+  if (priceTitle) {
+    priceTitle.textContent = `米・${priceSpec.labelJa}価格（sim）`;
+  }
+  if (priceHint) {
+    priceHint.textContent =
+      `シミュ内部の相対価格。米 1.0 をだいたい米1kg相当として、${priceSpec.labelJa}はランの本位（${runStandard}）に合わせて出す。現代円は PPP 側。`;
+  }
   drawLineChart(document.getElementById("chartPrice"), labels, [
     { name: "ricePrice", data: series.series.ricePrice || [] },
-    { name: "zundaPrice", data: series.series.zundaPrice || [] },
+    {
+      name: priceSpec.field,
+      data: series.series[priceSpec.field] || [],
+    },
   ]);
   rangeMeta.textContent = `${series.range || ""} · ${series.monthCount || ""} months · ${series.method || ""}`;
   const params = new URLSearchParams();
@@ -441,13 +506,12 @@ const METRIC_HINTS = {
   population: "マクロ人口。出生・死亡・移動の月次更新。",
   foodYen: "時代バスケット円 × 在庫月数/6。kg直換算ではない。",
   fidelity: "史実との近さ。米35%・金銀25%・正統性20%・人口20%の誤差を1から引く。",
-  "rice / zunda": "sim 相対価格。米1.0 ≒ 1kg相当。円は PPP 側。",
 };
 
-function addDl(dl, label, value) {
+function addDl(dl, label, value, hintOverride) {
   const dt = document.createElement("dt");
   dt.textContent = label;
-  const hint = METRIC_HINTS[label];
+  const hint = hintOverride || METRIC_HINTS[label];
   if (hint) {
     dt.title = hint;
     const mark = document.createElement("span");
@@ -469,6 +533,8 @@ function fillMonthDetail(host, data, yearMonth) {
   title.textContent = yearMonth;
   host.appendChild(title);
   const dl = document.createElement("dl");
+  const priceSpec = primaryPriceSpec(data.standard);
+  const prices = data.prices || {};
   addDl(dl, "events", (data.events || []).join(", "));
   addDl(dl, "decree", data.decree);
   addDl(dl, "rulerReason", data.rulerReason);
@@ -478,7 +544,12 @@ function fillMonthDetail(host, data, yearMonth) {
   addDl(dl, "population", data.population);
   addDl(dl, "foodYen", data.purchasingPower && data.purchasingPower.foodYenPerCapita);
   addDl(dl, "fidelity", data.fidelity);
-  addDl(dl, "rice / zunda", `${(data.prices || {}).ricePrice} / ${(data.prices || {}).zundaPrice}`);
+  addDl(
+    dl,
+    `rice / ${priceSpec.labelJa}`,
+    `${prices.ricePrice} / ${prices[priceSpec.field]}`,
+    PRICE_PAIR_HINT
+  );
   host.appendChild(dl);
   for (const agent of data.opinionAgents || []) {
     const block = document.createElement("div");
@@ -855,6 +926,16 @@ if (runSearch) {
 }
 document.getElementById("exportBtn").addEventListener("click", () => {
   exportCurrentRun().catch((error) => {
+    rangeMeta.textContent = String(error.message || error);
+  });
+});
+document.getElementById("exportSpeechBtn").addEventListener("click", () => {
+  exportSpeechRun().catch((error) => {
+    rangeMeta.textContent = String(error.message || error);
+  });
+});
+document.getElementById("exportDebugBtn").addEventListener("click", () => {
+  exportDebugRun().catch((error) => {
     rangeMeta.textContent = String(error.message || error);
   });
 });

@@ -11,7 +11,7 @@
 | `world/timeline.csv` | 世界側の発生月 |
 | `bridges/japan_from_world.csv` | 長崎・市況ラグでの再発火（同じ eventId） |
 
-日本国内史は `japan/*`（ユーザー主担当）。世界側と月が重なってもよい（例: 1929-10 に `great_depression` + `wall_street_crash`）。
+日本国内史は `japan/*`（日本側イベントの主データ）。世界側と月が重なってもよい（例: 1929-10 に `great_depression` + `wall_street_crash`）。
 
 ## 既存 worldEffect の使い分け
 

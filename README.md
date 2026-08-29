@@ -33,7 +33,7 @@ python -m src.main --validate-baseline
 python scripts/validate_baseline.py
 ```
 
-## ずんだ／あんこ価格の watching
+## ずんだ／あんこの価格（各本位で記録）
 
 どの本位制でも（`edo_metal` 含む）、開府時点から両市場が存在するという設定です。  
 毎月のログに `prices` が入る:
@@ -83,18 +83,18 @@ LM Studio 既定: 統治 `qwen3.6-27b`、crowd `qwen2.5-7b-instruct`（詳細 [M
 
 ## GitHub
 
-リモート: [Harunouta/Zunda-Yaboo](https://github.com/Harunouta/Zunda-Yaboo)（いまは private。公開するときは GitHub の Visibility を public に切り替えるだけでよい）。
+リモート: [Harunouta/Zunda-Yaboo](https://github.com/Harunouta/Zunda-Yaboo)（公開時は GitHub の Visibility を public に切り替えてください）。
 
 再配布の切り分けは **[REDISTRIBUTION.md](REDISTRIBUTION.md)** と **[licenses/THIRD_PARTY.md](licenses/THIRD_PARTY.md)**。
 
 | 区分 | 置き場 |
 |------|--------|
 | 同梱する | `src/`、`scripts/`、`config/`、`data/events/`、`data/redistributable/`（セリフ無し compare zip 含む）、Dockerfile 等 |
-| 同梱しない | `data/restricted/` のコーパス（非公開）、`logs/`、`checkpoints/`、モデル重み、Cursor/エージェント用指示（`HANDOFF.md`、`.cursor/` など） |
+| 同梱しない | `data/restricted/` のコーパス（非公開）、`logs/`、`checkpoints/`、モデル重み、ローカル作業メモ（`HANDOFF.md`、`.cursor/` など） |
 
 コードは MIT（[LICENSE](LICENSE)）。ずんだもん／あんこもんは [ずん子ガイドライン](https://zunko.jp/guideline.html) に従う非公式利用で、MIT の対象外です。聖書は公開しません。
 
-Excel からの再取込はユーザーの手元の xlsx を `--xlsx` で渡す（ホームの `Downloads` も見る）。リポジトリにはシート本体を入れません。
+Excel からの再取込は `--xlsx` でワークブックを指定する（未指定時は環境変数 `ZUNDA_EVENTS_XLSX`、詳細は各 `import_*.py --help`）。リポジトリにはシート本体を入れません。
 
 ## 前提
 
@@ -131,7 +131,7 @@ docker run --rm \
   -e CROWD_MODEL=qwen2.5-7b-instruct \
   -v ${PWD}/logs:/workspace/logs \
   -v ${PWD}/checkpoints:/workspace/checkpoints \
-  -v /path/to/Zunda-AI:/models \
+  -v /path/to/models:/models \
   zunda-yaboo:latest \
   --standard zunda --start 1603-01 --end 2026-08
 ```

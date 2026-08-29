@@ -582,9 +582,29 @@ def monthView(row: dict) -> dict:
         "rumor": agent.get("rumor"),
       }
     )
+  agriAgents = []
+  for agent in (row.get("agriLogistics") or {}).get("agents") or []:
+    agriAgents.append(
+      {
+        "agentId": agent.get("agentId"),
+        "areaId": agent.get("areaId"),
+        "roleId": agent.get("roleId"),
+        "displayName": agent.get("displayName"),
+        "rumor": agent.get("rumor"),
+      }
+    )
+  standard = str(row.get("monetaryStandard") or "")
+  primaryField = "zundaPrice"
+  if standard == "anko":
+    primaryField = "ankoPrice"
+  elif standard == "azuki":
+    primaryField = "azukiPrice"
+  ricePrice = float(prices.get("ricePrice") or 0.0)
+  primaryPrice = float(prices.get(primaryField) or 0.0)
+  primaryVsRice = (primaryPrice / ricePrice) if ricePrice > 0 else None
   return {
     "yearMonth": row.get("yearMonth"),
-    "standard": row.get("monetaryStandard"),
+    "standard": standard,
     "events": _visibleEvents(row),
     "decree": law.get("decree") or "",
     "rulerReason": behavior.get("rulerReason") or llm.get("rulerReason") or "",
@@ -593,6 +613,8 @@ def monthView(row: dict) -> dict:
     "moodText": crowd.get("moodText") or behavior.get("crowdMoodDetail") or "",
     "rumor": crowd.get("rumor") or "",
     "opinionAgents": agents,
+    "avgPanic": opinion.get("avgPanic"),
+    "agriAgents": agriAgents,
     "prices": {
       "zundaPrice": prices.get("zundaPrice"),
       "ankoPrice": prices.get("ankoPrice"),
@@ -609,6 +631,7 @@ def monthView(row: dict) -> dict:
       "method": ppp.get("method"),
     },
     "fidelity": fidelity.get("score"),
+    "primaryVsRice": primaryVsRice,
   }
 
 
@@ -705,6 +728,28 @@ def exportRunZip(stem: str) -> bytes:
       if extra.is_file() and extra.name in ALLOWED_ZIP_MEMBERS:
         archive.write(extra, extra.name)
   return buffer.getvalue()
+
+
+def _loadExportModule(moduleName: str, fileName: str):
+  spec = importlib.util.spec_from_file_location(moduleName, ROOT / "scripts" / fileName)
+  mod = importlib.util.module_from_spec(spec)
+  assert spec.loader is not None
+  spec.loader.exec_module(mod)
+  return mod
+
+
+def exportSpeechZip(stem: str) -> bytes:
+  stem = _safeStem(stem)
+  logPath = resolveRunPath(stem)
+  speechMod = _loadExportModule("export_speech_log", "export_speech_log.py")
+  return speechMod.buildSpeechZip(logPath)
+
+
+def exportDebugZip(stem: str) -> bytes:
+  stem = _safeStem(stem)
+  logPath = resolveRunPath(stem)
+  debugMod = _loadExportModule("export_debug_log", "export_debug_log.py")
+  return debugMod.buildDebugZip(logPath)
 
 
 def _stemFromFilename(filename: str) -> str:

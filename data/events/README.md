@@ -81,7 +81,7 @@ python -c "from src.events import getEventsForMonth, reloadEventData; reloadEven
 
 ### 統合Excelからの取り込み
 
-仕様: [`UNIFIED_EVENTS_SPEC.md`](UNIFIED_EVENTS_SPEC.md)（元 `sikii.md`）。  
+仕様: [`UNIFIED_EVENTS_SPEC.md`](UNIFIED_EVENTS_SPEC.md)。
 xlsx シート名の想定: `政治` / `地震` / `火山（整形済）` / `水害` / `その他の農作物への被害`
 
 | シート | 状態 | 取り込み |
@@ -90,7 +90,7 @@ xlsx シート名の想定: `政治` / `地震` / `火山（整形済）` / `水
 | 火山・インフラ・疫病（名前に「整形済」） | **済** | `python scripts/import_categorized_sheets.py --xlsx path/to.xlsx` |
 | 地震（`地震(整形済)`） | **済** | 同上。公開出典は [`japan/README.md`](japan/README.md) |
 | 火事（整形済） | **済** | 同上 |
-| 政治・争い | **待ち** | 整形済になってから同じスクリプト |
+| 政治・争い | 未取込 | 整形済シートが揃い次第、同じスクリプトで取り込み予定 |
 
 ```powershell
 # 飢饉・水害の再取込

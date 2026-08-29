@@ -22,4 +22,4 @@ Wikipedia記事本文の全文転載ではありません。
 これなら **CC BY-SA の帰属（リンク）** として問題になりにくい。
 Wikipedia本文を長文のまま YAML に貼るのは避ける（シェアAlikeと分量の問題）。
 
-件数: 地震 0 件、火事 0 件（取り込み時点）。
+取り込み件数や出典一覧は、同フォルダの `sources_shaped_sheets.txt` と `catalog.yaml` を参照してください。

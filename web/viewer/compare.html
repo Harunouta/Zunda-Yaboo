@@ -12,6 +12,7 @@
     <h1>ラン比較（閲覧のみ）</h1>
     <p class="sub">
       本閲覧の「このランを zip で出す」か、統計比較用 zip（monthly.jsonl + launch.json、総括なし）を複数選ぶ。起動・設定・再推論はなし。
+      <a href="/compare_duel.html">ずんパラ対決（重なり・世論/農業）</a> ·
       <a href="/">本閲覧へ戻る</a>
     </p>
   </header>
@@ -37,7 +38,8 @@
       <canvas id="chartFood" width="960" height="180"></canvas>
       <h3>fidelity</h3>
       <canvas id="chartFid" width="960" height="180"></canvas>
-      <h3>米・ずんだ価格（sim）</h3>
+      <h3 id="chartPriceTitle">米・主貨価格（sim）</h3>
+      <p id="chartPriceHint" class="hint">各ランの本位に合わせて主貨（ずんだ／あんこ／小豆）を出す。米は共通。</p>
       <canvas id="chartPrice" width="960" height="200"></canvas>
       <h3>期間の総括</h3>
       <p class="hint">統計比較用 zip には入っていない。グラフとイベント一覧だけで足りる。</p>

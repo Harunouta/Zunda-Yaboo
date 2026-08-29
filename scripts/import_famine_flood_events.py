@@ -438,7 +438,7 @@ def parseArgs() -> argparse.Namespace:
   parser.add_argument(
     "--xlsx",
     default=None,
-    help=f"Workbook path (else {ENV_XLSX}, else ~/Downloads/{DEFAULT_XLSX_NAME})",
+    help=f"Workbook path (else env {ENV_XLSX}, else default search paths; see script source)",
   )
   parser.add_argument(
     "--spec",

@@ -12,8 +12,18 @@ Examples:
 from __future__ import annotations
 
 import argparse
+import io
 import json
+import zipfile
 from pathlib import Path
+
+DEFAULT_SPEECH_KINDS = frozenset(
+  {"decree", "reason", "opinion", "mascot", "crowd_rumor", "mood", "agri"}
+)
+SPEECH_README = (
+  "Speech-only export from monthly.jsonl (decree, mascot, opinion, crowd, agri).\n"
+  "Local comparison use — not for public GitHub redistribution.\n"
+)
 
 
 def loadRows(path: Path) -> list[dict]:
@@ -77,7 +87,69 @@ def collectSpeechEvents(row: dict) -> list[dict]:
       "source": str(crowd.get("source") or ""),
       "events": events,
     })
+
+  crowdRumor = str(crowd.get("rumor") or behavior.get("crowdRumor") or "").strip()
+  if crowdRumor:
+    out.append({
+      "yearMonth": yearMonth,
+      "speaker": "crowd",
+      "kind": "crowd_rumor",
+      "text": crowdRumor,
+      "source": str(crowd.get("source") or ""),
+      "events": events,
+    })
+
+  moodText = str(crowd.get("moodText") or behavior.get("crowdMoodDetail") or "").strip()
+  if moodText:
+    out.append({
+      "yearMonth": yearMonth,
+      "speaker": "crowd",
+      "kind": "mood",
+      "text": moodText,
+      "source": str(crowd.get("source") or ""),
+      "events": events,
+    })
+
+  agri = row.get("agriLogistics") or {}
+  for agent in agri.get("agents") or []:
+    rumor = str(agent.get("rumor") or "").strip()
+    if not rumor:
+      continue
+    out.append({
+      "yearMonth": yearMonth,
+      "speaker": str(agent.get("agentId") or "agri"),
+      "kind": "agri",
+      "text": rumor,
+      "source": str(agri.get("source") or agent.get("source") or ""),
+      "stance": agent.get("stance"),
+      "events": events,
+    })
   return out
+
+
+def buildSpeechEvents(rows: list[dict], kinds: set[str] | None = None) -> list[dict]:
+  wanted = kinds or DEFAULT_SPEECH_KINDS
+  events: list[dict] = []
+  for row in rows:
+    for item in collectSpeechEvents(row):
+      if item["kind"] in wanted:
+        events.append(item)
+  return events
+
+
+def buildSpeechZip(logPath: Path, onlyEvents: bool = False) -> bytes:
+  rows = loadRows(logPath)
+  if onlyEvents:
+    rows = [row for row in rows if any(e != "riot_risk" for e in (row.get("events") or []))]
+  events = buildSpeechEvents(rows)
+  mdBody = toMarkdown(events)
+  jsonlBody = "".join(json.dumps(item, ensure_ascii=False) + "\n" for item in events)
+  buffer = io.BytesIO()
+  with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as archive:
+    archive.writestr("speech.jsonl", jsonlBody)
+    archive.writestr("speech.md", mdBody)
+    archive.writestr("README.txt", SPEECH_README)
+  return buffer.getvalue()
 
 
 def toMarkdown(events: list[dict]) -> str:
@@ -106,7 +178,7 @@ def main() -> int:
   parser.add_argument("--log", required=True, type=Path)
   parser.add_argument("--out-prefix", type=Path, default=None, help="Default: same stem as --log")
   parser.add_argument("--only-events", action="store_true")
-  parser.add_argument("--kinds", default="decree,mascot,opinion,reason", help="Comma list")
+  parser.add_argument("--kinds", default=",".join(sorted(DEFAULT_SPEECH_KINDS)), help="Comma list")
   args = parser.parse_args()
 
   wanted = {part.strip() for part in args.kinds.split(",") if part.strip()}
@@ -114,11 +186,7 @@ def main() -> int:
   if args.only_events:
     rows = [row for row in rows if any(e != "riot_risk" for e in (row.get("events") or []))]
 
-  events: list[dict] = []
-  for row in rows:
-    for item in collectSpeechEvents(row):
-      if item["kind"] in wanted:
-        events.append(item)
+  events = buildSpeechEvents(rows, wanted)
 
   prefix = args.out_prefix or args.log.with_suffix("")
   mdPath = Path(str(prefix) + ".speech.md")

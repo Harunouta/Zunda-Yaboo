@@ -54,7 +54,7 @@ Rebuild all: `python scripts/rebuild_climate_monthly.py` then gapfill is include
 
 ## Planned (not yet ingested)
 
-- Kinsei DB weather: **do not use**
-- See `DATA_INGEST_PLAN.md` for mortality / epidemic notes
+- Kinsei DB weather: **do not use** (project policy; see rice notes above)
+- Mortality / epidemic primary corpora: not bundled; events use YAML coefficients and short prompts only
 
 Do not commit `data/raw/**` bulk downloads or `data/processed/**` regenerated CSVs.

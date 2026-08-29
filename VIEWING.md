@@ -30,7 +30,7 @@ powershell -File .\scripts\republish_viewer_port.ps1
 画面でできること:
 
 - ランフォルダ `logs/runs/<名前>/monthly.jsonl` を選ぶ
-- 「AI / モデル」で LM Studio または OpenAI と役モデルを保存（Cursor 不要）
+- 「AI / モデル」で LM Studio または OpenAI と役モデルを保存（別途 IDE は不要）
 - 実行中は推論中の年月（この表示は **今動いている閲覧サーバのメモリ**。サーバを再起動すると sim が生きていても消える。HTML だけの変更では再起動しない）
 - 「その年を見る」で布告・マスコット・世論
 - ポップアップが消えても `logs/runs/<名前>/monthly.jsonl` の末尾と `logs/viewer_job.out` で進捗は読める
@@ -65,12 +65,12 @@ preset 名: `full-zunda` / `tenmei` / `covid-modern` / `perry` / `world-modern` 
 
 ---
 
-## Cursor Canvas（任意）
+## 年次グラフ（任意）
 
-チャット横の年次グラフ用。埋め込み JSON:
+`export_canvas_embed.py` で年次中央値 JSON を書き出し、外部ツールや Canvas に埋め込む用:
 
 ```powershell
-python scripts/export_canvas_embed.py --log logs/runs/historical_1603_2026.jsonl
+python scripts/export_canvas_embed.py --log logs/runs/<name>/monthly.jsonl
 ```
 
 ---
@@ -78,11 +78,11 @@ python scripts/export_canvas_embed.py --log logs/runs/historical_1603_2026.jsonl
 ## セリフ一覧・価格・PPP
 
 ```powershell
-python scripts/export_speech_log.py --log logs/runs/overnight_b_llm_1853.jsonl
-python scripts/export_price_csv.py --log logs/runs/zunda_full_1603_2026.jsonl --out logs/runs/zunda_full_1603_2026_prices.csv
-python scripts/analyze_run.py --log logs/runs/world_era_1801_2026.jsonl
-python scripts/export_purchasing_power.py --log logs/runs/zunda_full_1603_2026.jsonl
-python scripts/preview_month_log.py --log logs/runs/overnight_b_llm_1853.jsonl --tail 12
+python scripts/export_speech_log.py --log logs/runs/<name>/monthly.jsonl
+python scripts/export_price_csv.py --log logs/runs/<name>/monthly.jsonl --out logs/runs/<name>/prices.csv
+python scripts/analyze_run.py --log logs/runs/<name>/monthly.jsonl
+python scripts/export_purchasing_power.py --log logs/runs/<name>/monthly.jsonl
+python scripts/preview_month_log.py --log logs/runs/<name>/monthly.jsonl --tail 12
 ```
 
 - `*.speech.md` 読み物 / `*.speech.jsonl` 機械用

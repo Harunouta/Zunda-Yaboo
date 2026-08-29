@@ -1,7 +1,7 @@
 # Redistribution map (GitHub publication prep)
 
 This repo is prepared for a public GitHub release.  
-**Do not commit restricted assets.** Remote exists (`origin`); do not `git push` until the owner asks.
+**Do not commit restricted assets.** See [CONTRIBUTING.md](CONTRIBUTING.md) for what belongs in git.
 
 ## Quick legend
 
@@ -22,10 +22,11 @@ This repo is prepared for a public GitHub release.
 | `config/default.yaml` | Defaults (no secrets) |
 | `Dockerfile`, `docker-compose.yml`, `entrypoint.sh` | Container recipe |
 | `requirements.txt` | Declares PyYAML only |
-| `README.md`, `MODELS.md`, `LICENSE`, this file | Docs (not Cursor/agent handoff files) |
+| `README.md`, `MODELS.md`, `LICENSE`, this file | Docs (not local handoff files) |
 | `licenses/**` | Attribution |
 | `data/events/**` | User-editable history tables (OK to publish; keep sparse) |
-| `data/redistributable/**` | Synthetic / original sample data only. Includes speechless `compare_packs/*.zip` |
+| `data/redistributable/**` | Synthetic / original sample data only. Includes speechless `compare_packs/*.zip` and **duel** `duel_packs/*.zip` (opinion+agri, no mascot) |
+| `web/viewer/compare_duel.html` (+ js/css) | Public duel overlap viewer (MIT) |
 | `.gitignore` | Keeps NO paths out of git |
 
 Historical event *IDs and short Japanese prompt strings* in `src/events.py` and  
@@ -44,8 +45,8 @@ synthetic anchors in `src/historical_track.py` are original abstractions for the
 | `checkpoints/**` | Resume state |
 | `.env`, API keys, LM Studio tokens | Secrets |
 | Full copies of HF datasets | License / size / terms |
-| User Downloads dumps used as input | Local-only provenance |
-| `HANDOFF.md`, `.cursor/**`, `COMPLETION_PLAN.md`, `OVERNIGHT_*.md`, `docs/CUI_AND_VIZ.md`, `DATA_INGEST_PLAN.md` | Cursor / agent instruction text (local only) |
+| User-provided Excel workbooks used as import input | Local-only; pass `--xlsx` or set `ZUNDA_EVENTS_XLSX` |
+| `HANDOFF.md`, `.cursor/**`, `COMPLETION_PLAN.md`, `OVERNIGHT_*.md`, `docs/CUI_AND_VIZ.md`, `DATA_INGEST_PLAN.md` | Local handoff / overnight notes (gitignored) |
 
 ### Character / IP (especially careful)
 
@@ -93,4 +94,4 @@ zunda-yaboo/
 2. README links character guidelines instead of embedding full corpora  
 3. Confirm PyYAML / base image licenses unchanged  
 5. `python scripts/check_redistribution.py` passes  
-6. Owner flips GitHub visibility to public if desired, then `git push` (not automated here)  
+6. Maintainer sets GitHub visibility to public when ready, then pushes
