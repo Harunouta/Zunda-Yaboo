@@ -170,6 +170,7 @@ def buildOpinionPrompt(
   foodHint: str,
   legitimacyHint: str,
   decreeSnippet: str,
+  heardSpeech: str = "",
 ) -> str:
   """Fragmented context only — do not pass exact national stockpiles."""
   eventBits = [
@@ -180,12 +181,19 @@ def buildOpinionPrompt(
   memory = str(agent.get("memorySnippet") or "").strip()
   memoryLine = f" Your recent memory: {memory}." if memory else ""
   context = " / ".join(eventBits) if eventBits else "空気がおかしい。隣村の噂だけが頼りだ。"
+  speechLine = (
+    f"heardSpeech={heardSpeech}. "
+    "Include a reaction to that broadcast in rumor. "
+    if heardSpeech
+    else "heardSpeech=なし. "
+  )
   return (
     f"You are {agent['role']} ({agent['agentId']}) in {yearMonth}, "
     f"home={agent.get('homeRegionId')}, region={agent.get('regionId')}. "
     f"mode={agent.get('mode', 'embedded')}. influence={float(agent.get('influence', 0)):.2f}. "
     f"You only know fragments: foodFeel={foodHint}, regimeFeel={legitimacyHint}, "
     f"decreeWhisper={decreeSnippet or '聞こえない'}. "
+    f"{speechLine}"
     f"Context: {context}.{memoryLine} "
     "Output JSON: panic(0-1), rumor (concrete Japanese), "
     "intent (comply|hoard|flee|black_market|organize), localBias (short Japanese bias). "
@@ -198,6 +206,7 @@ def dryRunOpinionLeader(
   events: list[str],
   yearMonth: str,
   foodPerCapita: float,
+  heardSpeech: str = "",
 ) -> dict[str, Any]:
   panic = 0.25
   if events:
@@ -214,6 +223,8 @@ def dryRunOpinionLeader(
     rumor = f"{agent['role']}: {rumorBase}／事件={','.join(events[:2])}"
   else:
     rumor = f"{agent['role']}: {rumorBase}"
+  if heardSpeech:
+    rumor = f"{rumor}／演説={heardSpeech[:36]}"
 
   if panic >= 0.75:
     intent = "flee"
@@ -457,6 +468,7 @@ def _resolveOneLeader(
   legitimacy: float,
   decree: str,
   useLlm: bool,
+  heardSpeech: str = "",
 ) -> dict[str, Any]:
   foodHint = "腹が減る" if foodPerCapita < 0.08 else ("ギリギリ" if foodPerCapita < 0.15 else "普通に食える噂")
   legitimacyHint = "お上が怪しい" if legitimacy < 0.45 else ("揺れてる" if legitimacy < 0.7 else "まだ信じられてる")
@@ -468,10 +480,11 @@ def _resolveOneLeader(
     foodHint=foodHint,
     legitimacyHint=legitimacyHint,
     decreeSnippet=decreeSnippet,
+    heardSpeech=heardSpeech,
   )
 
   if not useLlm:
-    result = dryRunOpinionLeader(agent, events, yearMonth, foodPerCapita)
+    result = dryRunOpinionLeader(agent, events, yearMonth, foodPerCapita, heardSpeech=heardSpeech)
   else:
     try:
       from src.llm_client import callOpinionLeader
@@ -491,10 +504,14 @@ def _resolveOneLeader(
       if result["intent"] not in VALID_INTENTS:
         result["intent"] = "comply"
       if not result["rumor"]:
-        fallback = dryRunOpinionLeader(agent, events, yearMonth, foodPerCapita)
+        fallback = dryRunOpinionLeader(
+          agent, events, yearMonth, foodPerCapita, heardSpeech=heardSpeech
+        )
         result["rumor"] = fallback["rumor"]
     except Exception as error:
-      result = dryRunOpinionLeader(agent, events, yearMonth, foodPerCapita)
+      result = dryRunOpinionLeader(
+        agent, events, yearMonth, foodPerCapita, heardSpeech=heardSpeech
+      )
       result["source"] = f"llm_fallback:{error}"
 
   applyIntentStub(agent, str(result["intent"]))
@@ -519,6 +536,7 @@ def resolveOpinionLeaders(
   useLlm: bool,
   leaderCount: int,
   parallel: bool = False,
+  heardSpeech: str = "",
 ) -> dict[str, Any]:
   """Call up to leaderCount agents on abnormal months; otherwise inactive."""
   if leaderCount <= 0 or not isAbnormalMonth(events, disasterMultiplier):
@@ -544,6 +562,7 @@ def resolveOpinionLeaders(
           legitimacy=legitimacy,
           decree=decree,
           useLlm=useLlm,
+          heardSpeech=heardSpeech,
         ): agent
         for agent in selected
       }
@@ -562,6 +581,7 @@ def resolveOpinionLeaders(
           legitimacy=legitimacy,
           decree=decree,
           useLlm=useLlm,
+          heardSpeech=heardSpeech,
         )
       )
 
@@ -656,6 +676,7 @@ def attachMascotToCrowd(
   useLlm: bool,
   policySummary: str = "",
   prices: dict[str, Any] | None = None,
+  heardSpeech: str = "",
 ) -> dict[str, Any]:
   """One mascot speech pass after mass mood is known (abnormal-month path)."""
   from src.mascot import buildMascotUserPrompt, dryRunMascotSpeech, emptyMascotFields, mascotForStandard
@@ -675,6 +696,7 @@ def attachMascotToCrowd(
       legitimacy=legitimacy,
       events=events,
       decree=decree,
+      heardSpeech=heardSpeech,
     )
     return crowd
 
@@ -689,6 +711,7 @@ def attachMascotToCrowd(
       decree,
       prices=prices,
       policySummary=policySummary,
+      heardSpeech=heardSpeech,
     )
     # Reuse crowd call but keep propagated numeric mood; only take speech.
     mood = callCrowd(prompt, mascotId=mascotId)
@@ -704,6 +727,7 @@ def attachMascotToCrowd(
       legitimacy=legitimacy,
       events=events,
       decree=decree,
+      heardSpeech=heardSpeech,
     )
     crowd["mascotSource"] = f"llm_fallback:{error}"
   return crowd

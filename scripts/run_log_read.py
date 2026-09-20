@@ -608,6 +608,8 @@ def monthView(row: dict) -> dict:
     "events": _visibleEvents(row),
     "decree": law.get("decree") or "",
     "rulerReason": behavior.get("rulerReason") or llm.get("rulerReason") or "",
+    "publicSpeech": behavior.get("publicSpeech") or llm.get("publicSpeech") or "",
+    "speechSource": behavior.get("speechSource") or llm.get("speechSource") or "none",
     "mascotId": crowd.get("mascotId") or "",
     "mascotSpeech": behavior.get("mascotSpeech") or crowd.get("mascotSpeech") or "",
     "moodText": crowd.get("moodText") or behavior.get("crowdMoodDetail") or "",

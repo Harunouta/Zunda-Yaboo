@@ -129,12 +129,14 @@ def buildAgriPrompt(
   yearMonth: str,
   events: list[str],
   decree: str,
+  heardSpeech: str = "",
 ) -> str:
   area = (mediatorState.get("areas") or {}).get(agent["areaId"]) or {}
   national = mediatorState.get("national") or {}
   memory = str(agent.get("lastRumor") or "").strip()
   memoryLine = f" Recent memory: {memory}." if memory else ""
   eventBit = ",".join(events[:4]) if events else "静かな月"
+  speechBit = heardSpeech if heardSpeech else "なし"
   return (
     f"You are {agent['displayName']} ({agent['roleId']}) in {agent['areaId']}, {yearMonth}. "
     f"Bias: {agent['systemBias']}. "
@@ -145,7 +147,8 @@ def buildAgriPrompt(
     f"fiatTrust={float(national.get('fiatTrust') or 1):.2f}, "
     f"kitHarvest={float(coeffKit.get('harvestBoost') or 0):.2f}, "
     f"kitShip={float(coeffKit.get('transferBoost') or 0):.2f}. "
-    f"decreeWhisper={decree or 'なし'}. events={eventBit}.{memoryLine} "
+    f"decreeWhisper={decree or 'なし'}. heardSpeech={speechBit}. "
+    f"events={eventBit}.{memoryLine} "
     "Output JSON: effort (0.35-1.45 how hard you work this month), "
     "blackMarketLeak (0-1 how much you siphon to the night market), "
     "stance (short english tag), rumor (one vivid Japanese sentence). "
@@ -173,6 +176,7 @@ def _resolveOneAgri(
   events: list[str],
   decree: str,
   useLlm: bool,
+  heardSpeech: str = "",
 ) -> dict[str, Any]:
   fallback = dryRunRoleIntent(agent, mediatorState, coeffKit, yearMonth)
   if not useLlm:
@@ -180,7 +184,15 @@ def _resolveOneAgri(
   try:
     from src.llm_client import callAgriAgent
 
-    prompt = buildAgriPrompt(agent, mediatorState, coeffKit, yearMonth, events, decree)
+    prompt = buildAgriPrompt(
+      agent,
+      mediatorState,
+      coeffKit,
+      yearMonth,
+      events,
+      decree,
+      heardSpeech=heardSpeech,
+    )
     raw = callAgriAgent(prompt, agent["displayName"], agent["roleId"])
     return _parseAgriLlm(raw, fallback)
   except Exception as error:
@@ -197,6 +209,7 @@ def resolveAgriLogistics(
   decree: str,
   useLlm: bool,
   parallel: bool = True,
+  heardSpeech: str = "",
 ) -> dict[str, Any]:
   results: list[dict[str, Any]] = []
   if useLlm and parallel and len(roster) > 1:
@@ -211,6 +224,7 @@ def resolveAgriLogistics(
           events,
           decree,
           useLlm,
+          heardSpeech,
         ): agent
         for agent in roster
       }
@@ -221,7 +235,16 @@ def resolveAgriLogistics(
   else:
     for agent in roster:
       results.append(
-        _resolveOneAgri(agent, mediatorState, coeffKit, yearMonth, events, decree, useLlm)
+        _resolveOneAgri(
+          agent,
+          mediatorState,
+          coeffKit,
+          yearMonth,
+          events,
+          decree,
+          useLlm,
+          heardSpeech,
+        )
       )
 
   byArea: dict[str, dict[str, Any]] = {

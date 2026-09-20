@@ -161,21 +161,34 @@ E = 0.35\,|\log(r_{\text{sim}}/r_{\text{tgt}})| + 0.25\,e_{\text{金銀}} + 0.2\
 触る（ソフト制御）          触らない（ハード状態）
 ─────────────────          ────────────────────
 decree 文面                 population の直接指定
-taxRate（その後 clip）      ricePrice の直接指定
-processBeansRatio           climateIndex の捏造
-hoarding / anger            イベントの有無（カレンダーが先）
-effort / blackMarketLeak    収穫月カレンダー
-mascotSpeech                fidelity の計算式
-opinion の intent           PPP バスケット
+publicSpeech（報道）        ricePrice の直接指定
+taxRate（その後 clip）      climateIndex の捏造
+processBeansRatio           イベントの有無（カレンダーが先）
+hoarding / anger            収穫月カレンダー
+effort / blackMarketLeak    fidelity の計算式
+mascotSpeech                PPP バスケット
+opinion の intent
 ```
 
 LLM 呼び出しは **推論（inference）** です。月次ループに重み更新（backpropagation / fine-tune）はありません。聖書（`data/restricted/`、非公開）をプロンプトに載せるのはコンテキスト注入で、必須のベクトルDBはありません。失敗時は `llm_fallback:*` で dry-run に戻します。
+
+### 為政者演説（報道）と SLM
+
+毎月は出さない。カタログ命中・異常月・regime 切替・FX 介入・（`--llm` 時のみ）平穏月の低確率で `publicSpeech` を解決する。
+
+| モード | 出所 |
+|--------|------|
+| `--historical-policy` | `data/events/speeches/catalog.yaml` のみ（為政者 LLM 増なし）。無い月は decree のみ |
+| 自由プレイ + `--llm` | 同じ状況キー／eventId なら **カタログ優先**（似た状況→似た文）。無いときだけ ruler JSON の `publicSpeech` |
+| `--no-llm` | カタログがあればそれ、なければ none（定型演説は増やさない） |
+
+市井（crowd / マスコット / opinion / 農）は **全文** `heardSpeech` を受け取り、反応を rumor / mood に載せる。演説は価格を直接書き換えない（anger / hoarding / intent 経由のみ）。帰属正本は [`data/events/speeches/wikipedia_excerpts.yaml`](../data/events/speeches/wikipedia_excerpts.yaml)（CC BY-SA）。
 
 既定モデル（詳細は [`MODELS.md`](../MODELS.md)）:
 
 | 役割 | 既定 | 頻度 |
 |------|------|------|
-| ruler | Qwen 3.6 27B 級 | 毎月（`--llm` かつ非 `--historical-policy`） |
+| ruler | Qwen 3.6 27B 級 | 毎月（`--llm` かつ非 `--historical-policy`）。演説フィールドはゲート時のみ |
 | crowd / マスコット / 農 | Qwen 2.5 7B（失敗時 Gemma など） | `--llm` なら農は毎月・地区×役割 |
 | opinion | crowd 系 | 異常月、または `--llm` 時 |
 

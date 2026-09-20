@@ -86,6 +86,12 @@ from src.opinion_agents import (
   updateRegionFounding,
 )
 from src.purchasing_power import computePurchasingPower, foodYenPerCapita
+from src.speeches import (
+  eventsHaveFxIntervention,
+  lookupSpeech,
+  resolvePublicSpeech,
+  shouldEmitPublicSpeech,
+)
 
 # Verbose per-month prints (default quiet for long runs).
 PRINT_EACH_MONTH = os.getenv("ZUNDA_QUIET", "1") != "1"
@@ -305,19 +311,25 @@ def resolveRuler(
   fallback: RulerDecision,
   prompt: str,
   useLlm: bool,
-) -> tuple[RulerDecision, str, str]:
+  emitPublicSpeech: bool = False,
+) -> tuple[RulerDecision, str, str, str]:
   if not useLlm:
-    return fallback, "dry_run", ""
+    return fallback, "dry_run", "", ""
   try:
     from src.llm_client import callRuler
 
-    decision, meta = callRuler(prompt)
+    decision, meta = callRuler(prompt, emitPublicSpeech=emitPublicSpeech)
     decreeText = str(decision.law.decree or "").strip()
     if not decreeText or decreeText in (".", "..", "..."):
       decision.law.decree = fallback.law.decree
-    return decision, "llm", str(meta.get("rulerReason", ""))
+    return (
+      decision,
+      "llm",
+      str(meta.get("rulerReason", "")),
+      str(meta.get("publicSpeech", "")),
+    )
   except Exception as error:
-    return fallback, f"llm_fallback:{error}", ""
+    return fallback, f"llm_fallback:{error}", "", ""
 
 
 def resolveCrowd(
@@ -332,6 +344,7 @@ def resolveCrowd(
   events: list[str] | None = None,
   policySummary: str = "",
   prices: dict[str, Any] | None = None,
+  heardSpeech: str = "",
 ) -> dict[str, Any]:
   from src.mascot import buildMascotUserPrompt, mascotForStandard
 
@@ -346,6 +359,7 @@ def resolveCrowd(
       yearMonth=yearMonth,
       decree=decree,
       events=eventList,
+      heardSpeech=heardSpeech,
     )
   try:
     from src.llm_client import callCrowd
@@ -360,6 +374,7 @@ def resolveCrowd(
         decree,
         prices=prices,
         policySummary=policySummary,
+        heardSpeech=heardSpeech,
       )
     mood = callCrowd(mascotPrompt, mascotId=mascotId)
     mood["source"] = "llm"
@@ -373,10 +388,10 @@ def resolveCrowd(
       yearMonth=yearMonth,
       decree=decree,
       events=eventList,
+      heardSpeech=heardSpeech,
     )
     mood["source"] = f"llm_fallback:{error}"
     return mood
-
 
 def parseYearMonth(text: str) -> tuple[int, int]:
   yearStr, monthStr = text.split("-")
@@ -640,6 +655,19 @@ def runMonthlySimulation(
     policyHand = dealPolicyHand(yearMonth, mediatorState)
     if PRINT_EACH_MONTH:
       print(f"month {yearMonth} llm={useLlm} events={events}", flush=True)
+    hasFxSpeech = eventsHaveFxIntervention(eventPayloads)
+    catalogSpeechHit = lookupSpeech(yearMonth, events) is not None
+    monthIsAbnormal = isAbnormalMonth(events, disasterMultiplier)
+    wantSpeech = shouldEmitPublicSpeech(
+      yearMonth=yearMonth,
+      events=events,
+      isAbnormal=monthIsAbnormal,
+      regimeChange=regimeChange,
+      hasFxIntervention=hasFxSpeech,
+      useLlm=useLlm,
+      catalogHit=catalogSpeechHit,
+    )
+    llmPublicSpeech = ""
     if historicalPolicy and liveStandard in HISTORY_STANDARDS:
       decision = decisionFromHistorical(economy.year, economy.month)
       decisionSource = "historical_policy"
@@ -653,7 +681,23 @@ def runMonthlySimulation(
         policyHand=policyHand,
         agriBrief=str(meta.get("lastAgriBrief") or ""),
       )
-      decision, decisionSource, rulerReason = resolveRuler(fallback, leaderPrompt, useLlm=useLlm)
+      needLlmSpeech = wantSpeech and useLlm and not catalogSpeechHit
+      decision, decisionSource, rulerReason, llmPublicSpeech = resolveRuler(
+        fallback,
+        leaderPrompt,
+        useLlm=useLlm,
+        emitPublicSpeech=needLlmSpeech,
+      )
+    publicSpeech, speechSource, speechId = resolvePublicSpeech(
+      yearMonth=yearMonth,
+      events=events,
+      historicalPolicy=bool(historicalPolicy and liveStandard in HISTORY_STANDARDS),
+      useLlm=useLlm,
+      isAbnormal=monthIsAbnormal,
+      regimeChange=regimeChange,
+      hasFxIntervention=hasFxSpeech,
+      llmPublicSpeech=llmPublicSpeech,
+    )
     leaderPrompt = buildLeaderPrompt(
       events,
       yearMonth,
@@ -662,8 +706,11 @@ def runMonthlySimulation(
       agriBrief=str(meta.get("lastAgriBrief") or ""),
     )
     if PRINT_EACH_MONTH:
-      print(f"  ruler={decisionSource}", flush=True)
-
+      print(
+        f"  ruler={decisionSource} speech={speechSource}"
+        f"{(':' + speechId) if speechId else ''}",
+        flush=True,
+      )
     catalog = loadPolicyCatalog()
     activatedIds = clampActivatedIds(list(dict.fromkeys(decision.activatedPolicyIds)), policyHand, catalog)
     for policyId in activatedIds:
@@ -700,6 +747,7 @@ def runMonthlySimulation(
       str(decision.law.decree or ""),
       useLlm=runAgriLlm,
       parallel=agriParallel and runAgriLlm,
+      heardSpeech=publicSpeech,
     )
     decision.policy.processBeansRatio = max(
       0.0,
@@ -740,6 +788,7 @@ def runMonthlySimulation(
       decree=effective.law.decree,
       policySummary=policySummary,
       agriRumors=str(meta.get("lastAgriBrief") or ""),
+      heardSpeech=publicSpeech,
     )
 
     opinionBlock: dict[str, Any] = {"active": False, "trigger": [], "agents": []}
@@ -758,6 +807,7 @@ def runMonthlySimulation(
         useLlm=useLlm,
         leaderCount=opinionLeaderCount,
         parallel=opinionParallel,
+        heardSpeech=publicSpeech,
       )
       crowd = propagateCrowdFromOpinions(
         opinionBlock.get("agents") or [],
@@ -773,6 +823,7 @@ def runMonthlySimulation(
         events=events,
         decree=effective.law.decree,
         useLlm=useLlm,
+        heardSpeech=publicSpeech,
       )
     else:
       opinionBlock["influenceDecay"] = decayRosterInfluence(agentRoster)
@@ -787,6 +838,7 @@ def runMonthlySimulation(
         decree=effective.law.decree,
         events=events,
         policySummary=policySummary,
+        heardSpeech=publicSpeech,
       )
 
     nationalMed = mediatorState["national"]
@@ -1013,6 +1065,8 @@ def runMonthlySimulation(
       foodPerCapita=foodPerCapita,
       legitimacy=governance.legitimacy,
       rulerReason=rulerReason,
+      publicSpeech=publicSpeech,
+      speechSource=speechSource,
     )
 
     logEntry = {
@@ -1103,6 +1157,9 @@ def runMonthlySimulation(
         "crowdPrompt": crowdPrompt,
         "historicalPolicy": historicalPolicy,
         "rulerReason": behavior["rulerReason"],
+        "publicSpeech": publicSpeech or None,
+        "speechSource": speechSource,
+        "speechId": speechId or None,
       },
     }
 

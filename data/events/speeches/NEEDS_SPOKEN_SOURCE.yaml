@@ -1,0 +1,10 @@
+# Queued for spoken-source hunt (NOT loaded by sim).
+# Need 詔書 / 告諭 / 記者会見 / 閣議後発言の一次文.
+# Do NOT put encyclopedia leads into publicSpeech (see README Critical rule).
+# Perry intentionally excluded forever (user request).
+
+needsSpokenSource:
+  - yearMonth: "1836-01"
+    eventIds: ["tenpo_famine_4"]
+    wanted: "幕府の御救／触書の連続読み上げ"
+    note: "ja.wikipedia「天保の大飢饉」「救荒」等に御救小屋設置の叙述はあるが、触書・御救の連続読み上げ本文なし。創作しない。"

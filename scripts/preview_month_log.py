@@ -30,6 +30,8 @@ def formatRow(row: dict) -> str:
     f"## {yearMonth}  events={events or '-'}",
     f"  decree : {law.get('decree', '')}",
     f"  reason : {behavior.get('rulerReason') or row.get('llm', {}).get('rulerReason', '')}",
+    f"  speech : {(behavior.get('publicSpeech') or row.get('llm', {}).get('publicSpeech') or '-')} "
+    f"[{behavior.get('speechSource') or row.get('llm', {}).get('speechSource') or 'none'}]",
     f"  policy : {behavior.get('policySummary', '')}",
     f"  mood   : {behavior.get('crowdMoodDetail') or crowd.get('moodText', '')}",
     f"  react  : {behavior.get('eventReaction') or crowd.get('eventReaction', '')}",

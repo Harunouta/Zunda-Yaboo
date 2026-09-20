@@ -500,6 +500,8 @@ const METRIC_HINTS = {
   events: "その月に発火したイベント ID。riot_risk は一覧から除外。",
   decree: "為政者（ruler）が出した布告文。",
   rulerReason: "布告の理由。LLM ならモデル、なければルール。",
+  publicSpeech: "為政者の演説・報道（市井が聞く全文）。catalog または LLM。無い月は —。",
+  speechSource: "演説の出所: catalog / llm / none。",
   mascot: "マスコットの一言。crowd 役のモデル、または定型。",
   mood: "民衆ムードの短文。",
   rumor: "市中の噂。",
@@ -538,6 +540,10 @@ function fillMonthDetail(host, data, yearMonth) {
   addDl(dl, "events", (data.events || []).join(", "));
   addDl(dl, "decree", data.decree);
   addDl(dl, "rulerReason", data.rulerReason);
+  if (data.publicSpeech) {
+    addDl(dl, "publicSpeech", data.publicSpeech);
+    addDl(dl, "speechSource", data.speechSource || "none");
+  }
   addDl(dl, "mascot", `${data.mascotId || ""} ${data.mascotSpeech || ""}`);
   addDl(dl, "mood", data.moodText);
   addDl(dl, "rumor", data.rumor);

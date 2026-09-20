@@ -45,6 +45,7 @@ def dryRunCrowd(
   yearMonth: str = "1603-01",
   decree: str = "",
   events: list[str] | None = None,
+  heardSpeech: str = "",
 ) -> dict[str, Any]:
   anger = 0.15
   if foodPerCapita < FOOD_HUNGRY:
@@ -65,6 +66,8 @@ def dryRunCrowd(
   rumor = DRY_RUN_RUMORS[rumorIndex]
   if eventList:
     rumor = f"{rumor}／事件の影: {', '.join(eventList[:2])}"
+  if heardSpeech:
+    rumor = f"{rumor}／演説の影: {heardSpeech[:40]}"
   moodText = DRY_RUN_MOODS[moodIndex]
   if foodPerCapita < FOOD_HUNGRY:
     moodText = "空腹が噂を辛くする月だ"
@@ -73,11 +76,14 @@ def dryRunCrowd(
 
   crowdMoodDetail = (
     f"food={foodPerCapita:.3f} legit={legitimacy:.2f} anger={anger:.2f}; "
-    f"decree影={decree[:24] if decree else 'なし'}"
+    f"decree影={decree[:24] if decree else 'なし'}; "
+    f"speech影={heardSpeech[:24] if heardSpeech else 'なし'}"
   )
   eventReaction = (
     f"事件あり→{', '.join(eventList)}" if eventList else "平穏月→噂だけで腹を満たす"
   )
+  if heardSpeech:
+    eventReaction = f"{eventReaction}／演説を聞いた"
 
   mascotId = mascotForStandard(standard)
   result: dict[str, Any] = {
@@ -102,9 +108,9 @@ def dryRunCrowd(
       legitimacy=legitimacy,
       events=eventList,
       decree=decree,
+      heardSpeech=heardSpeech,
     )
   return result
-
 
 def summarizePolicy(policy: dict[str, Any] | None) -> str:
   if not policy:
@@ -154,6 +160,8 @@ def buildBehaviorLog(
   foodPerCapita: float,
   legitimacy: float,
   rulerReason: str = "",
+  publicSpeech: str = "",
+  speechSource: str = "none",
 ) -> dict[str, Any]:
   reason = rulerReason or synthesizeRulerReason(decree, events, decisionSource, yearMonth)
   moodDetail = str(crowd.get("crowdMoodDetail") or crowd.get("moodText") or "")
@@ -170,4 +178,6 @@ def buildBehaviorLog(
     "crowdMoodDetail": moodDetail,
     "eventReaction": eventReaction,
     "mascotSpeech": str(crowd.get("mascotSpeech") or ""),
+    "publicSpeech": publicSpeech or None,
+    "speechSource": speechSource or "none",
   }

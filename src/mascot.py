@@ -153,6 +153,7 @@ def buildMascotUserPrompt(
   decree: str,
   prices: dict[str, Any] | None = None,
   policySummary: str = "",
+  heardSpeech: str = "",
 ) -> str:
   eventText = ", ".join(events) if events else "特に大きな事件なし"
   priceText = "価格情報なし"
@@ -163,6 +164,12 @@ def buildMascotUserPrompt(
         bits.append(f"{key}={prices[key]}")
     if bits:
       priceText = ", ".join(bits)
+  speechLine = ""
+  if heardSpeech:
+    speechLine = (
+      f"為政者の演説・報道（全文）: {heardSpeech}。"
+      "この演説を聞いた反応を mascotSpeech に必ず含めよ。"
+    )
   return (
     f"いまは {yearMonth}。あなたは庶民の中のたった一人のマスコットだ。"
     f"食料目安={foodPerCapita:.4f}, 政権正統性={legitimacy:.3f}。"
@@ -170,7 +177,8 @@ def buildMascotUserPrompt(
     f"政策要約: {policySummary or 'なし'}。"
     f"物価メモ: {priceText}。"
     f"出来事: {eventText}。"
-    "事件・物価・腹・布告のどれかに必ず触れ、キャラ口調で mascotSpeech に書け。"
+    f"{speechLine}"
+    "事件・物価・腹・布告・演説のどれかに必ず触れ、キャラ口調で mascotSpeech に書け。"
     "crowdMoodDetail と eventReaction も日本語で短く書け。"
   )
 
@@ -201,10 +209,13 @@ def dryRunMascotSpeech(
   legitimacy: float = 0.7,
   events: list[str] | None = None,
   decree: str = "",
+  heardSpeech: str = "",
 ) -> str:
   hook = _eventHook(events)
   decreeHint = ""
-  if decree:
+  if heardSpeech:
+    decreeHint = f"演説は「{heardSpeech[:36]}」だと聞いた。"
+  elif decree:
     decreeHint = f"布告は「{decree[:18]}」だと聞いた。"
 
   if mascotId == "zundamon":

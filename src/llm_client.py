@@ -64,6 +64,7 @@ RULER_SCHEMA: dict[str, Any] = {
     },
     "historicalPolicyIds": {"type": "array", "items": {"type": "string"}},
     "rulerReason": {"type": "string"},
+    "publicSpeech": {"type": "string"},
   },
   "required": ["law", "policy"],
 }
@@ -340,15 +341,25 @@ def modelsForRole(role: str) -> list[str]:
   return models
 
 
-def callRuler(userPrompt: str) -> tuple[RulerDecision, dict[str, Any]]:
+def callRuler(
+  userPrompt: str,
+  emitPublicSpeech: bool = False,
+) -> tuple[RulerDecision, dict[str, Any]]:
+  speechRule = (
+    "Also set publicSpeech: 2-4 Japanese sentences in a quotable broadcast tone "
+    "(報道・通達). Do NOT repeat law.decree. Speak to the street, not the ledger. "
+    if emitPublicSpeech
+    else "Omit publicSpeech or leave it empty this month (no broadcast)."
+  )
   systemPrompt = (
     "You are the Edo/modern Japanese ruler agent. "
     "Invent law and policy freely. You hear farmers, millers, and shippers. "
-    "Output JSON with law, policy, optional rulerReason. "
+    "Output JSON with law, policy, optional rulerReason, optional publicSpeech. "
     "historicalPolicyIds picks up to 3 coefficient items from the monthly hand. "
     "Empty array is normal. Items twist inflation-brake vs growth for several months. "
     "law.decree must be Japanese, short, and readable — avoid bland boilerplate. "
-    "rulerReason is one witty or tense Japanese sentence explaining the decree."
+    "rulerReason is one witty or tense Japanese sentence explaining the decree. "
+    + speechRule
   )
   models = modelsForRole("ruler")
   lastError: Exception | None = None
@@ -356,8 +367,12 @@ def callRuler(userPrompt: str) -> tuple[RulerDecision, dict[str, Any]]:
     try:
       raw = callChat(userPrompt, systemPrompt, model, jsonSchema=RULER_SCHEMA)
       decision = parseRulerDecision(raw)
+      publicSpeech = ""
+      if emitPublicSpeech:
+        publicSpeech = str(raw.get("publicSpeech") or "").strip()
       meta = {
         "rulerReason": str(raw.get("rulerReason") or raw.get("reason") or ""),
+        "publicSpeech": publicSpeech,
       }
       return decision, meta
     except Exception as error:

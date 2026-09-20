@@ -421,6 +421,7 @@ def buildCrowdPrompt(
   decree: str = "",
   policySummary: str = "",
   agriRumors: str = "",
+  heardSpeech: str = "",
 ) -> str:
   prompts = [
     getEventPayload(event).promptForOpinionLeader
@@ -430,10 +431,13 @@ def buildCrowdPrompt(
   status = (
     f"Month {yearMonth}. foodPerCapita={foodPerCapita:.4f}, legitimacy={legitimacy:.3f}. "
     f"decree={decree or 'なし'}. policy={policySummary or 'なし'}. "
+    f"heardSpeech={heardSpeech or 'なし'}. "
     "Output JSON: rumor, anger(0-1), hoarding(0-1), riotRisk(0-1), moodText, "
     "crowdMoodDetail, eventReaction. "
     "rumor と moodText は具体的な日本語。抽象的な『不安』だけの文は禁止。"
   )
+  if heardSpeech:
+    status += " 為政者の演説・報道を聞いた反応を rumor / moodText / eventReaction に含めよ。"
   if agriRumors:
     status += f" Field: {agriRumors}"
   if prompts:
