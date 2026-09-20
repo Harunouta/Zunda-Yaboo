@@ -1,6 +1,6 @@
 # Zunda-Yaboo — 江戸幕府〜現代 月次経済シミュレーション
 
-**ver1** — このバージョンは「ずんパラふぉーすネタ用」です。
+**[ver1](https://github.com/Harunouta/Zunda-Yaboo/tree/v1)** — このバージョンは「ずんパラふぉーすネタ用」です。
 
 江戸幕府開府（**1603-01**）から **2026-08** まで、1ヶ月=1ターンで回します。  
 GUIなし。通貨制度は CLI の `--standard`（ラジオ相当）で選択します。
@@ -14,7 +14,7 @@ GUIなし。通貨制度は CLI の `--standard`（ラジオ相当）で選択�
 
 見て遊ぶ:
 
-- **ブラウザ** … `open_viewer.bat` → `http://127.0.0.1:8765/`（月次画面・短い起動）。比較用のセリフ無し zip は [`data/redistributable/compare_packs/`](data/redistributable/compare_packs/) を `/compare.html` に載せる。
+- **ブラウザ** … `open_viewer.bat` → `http://127.0.0.1:8765/`（月次画面・短い起動）
 - **CUI** … ターミナルで `python scripts/operator_cui.py` または `python scripts/play_run.py --preset …`
 
 手順の本体は [`VIEWING.md`](VIEWING.md)。
@@ -33,7 +33,7 @@ python -m src.main --validate-baseline
 python scripts/validate_baseline.py
 ```
 
-## ずんだ／あんこの価格（各本位で記録）
+## ずんだ／あんこ価格の watching
 
 どの本位制でも（`edo_metal` 含む）、開府時点から両市場が存在するという設定です。  
 毎月のログに `prices` が入る:
@@ -69,7 +69,7 @@ python -m src.main --no-llm --standard edo_metal --historical-policy --start 160
 | `edo_metal` | なし |
 | `dollar` | なし |
 
-ずんだもん／あんこもん向けの詳細コーパス（ペルソナ用テキスト）は **非公開**です。このリポジトリにも、公開ダウンロード先にも置きません。手元にある場合のみ `data/restricted/` へ（[手順](data/restricted/README.md)）。無い場合は短いフォールバックで動作します。  
+詳細コーパス（ずんだもん／あんこもんの設定テキスト）は **非公開**です。このリポジトリにも、公開ダウンロード先にも置きません。手元にある場合のみ `data/restricted/` へ（[手順](data/restricted/README.md)）。無い場合は短いフォールバックで動作します。  
 キャラクターの利用は [ずん子ガイドライン](https://zunko.jp/guideline.html) に従う想定です。
 
 毎月のログ `crowd.mascotId` / `crowd.mascotSpeech` に口調つき発話が入ります。
@@ -79,7 +79,20 @@ python -m src.main --no-llm --standard edo_metal --historical-policy --start 160
 LM Studio 既定: 統治 `qwen3.6-27b`、crowd `qwen2.5-7b-instruct`（詳細 [MODELS.md](MODELS.md)）。  
 27B と別の大モデルを同時 Load すると `terminated` になりやすいので、crowd は 7B を推奨。
 
-月次のどこが数式でどこが LLM かは [docs/RULES_VS_LLM.md](docs/RULES_VS_LLM.md)。農の三角・政策カード・オピニオン伝播などの図は [docs/INTERNALS.md](docs/INTERNALS.md)。
+## GitHub
+
+リモート: [Harunouta/Zunda-Yaboo](https://github.com/Harunouta/Zunda-Yaboo)（いまは private。公開するときは GitHub の Visibility を public に切り替えるだけでよい）。
+
+再配布の切り分けは **[REDISTRIBUTION.md](REDISTRIBUTION.md)** と **[licenses/THIRD_PARTY.md](licenses/THIRD_PARTY.md)**。
+
+| 区分 | 置き場 |
+|------|--------|
+| 同梱する | `src/`、`scripts/`、`config/`、`data/events/`、`data/redistributable/`、Dockerfile 等 |
+| 同梱しない | `data/restricted/` のコーパス（非公開）、`logs/`、`checkpoints/`、モデル重み、Cursor/エージェント用指示（`HANDOFF.md`、`.cursor/` など） |
+
+コードは MIT（[LICENSE](LICENSE)）。ずんだもん／あんこもんは [ずん子ガイドライン](https://zunko.jp/guideline.html) に従う非公式利用で、MIT の対象外です。コーパスはこのリポジトリでは公開しません。
+
+Excel からの再取込はユーザーの手元の xlsx を `--xlsx` で渡す（ホームの `Downloads` も見る）。リポジトリにはシート本体を入れません。
 
 ## 前提
 
@@ -116,7 +129,7 @@ docker run --rm \
   -e CROWD_MODEL=qwen2.5-7b-instruct \
   -v ${PWD}/logs:/workspace/logs \
   -v ${PWD}/checkpoints:/workspace/checkpoints \
-  -v /path/to/models:/models \
+  -v /path/to/Zunda-AI:/models \
   zunda-yaboo:latest \
   --standard zunda --start 1603-01 --end 2026-08
 ```
