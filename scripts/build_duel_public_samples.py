@@ -23,7 +23,7 @@ def monthRow(year: int, month: int, standard: str, side: str) -> dict:
   ym = f"{year:04d}-{month:02d}"
   primaryField = "zundaPrice" if standard == "zunda" else "azukiPrice"
   basePrice = 1.1 if standard == "zunda" else 0.9
-  pop = 12000.0 if side == "a" else 11000.0
+  pop = 1220.0 if side == "a" else 1100.0
   return {
     "yearMonth": ym,
     "year": year,

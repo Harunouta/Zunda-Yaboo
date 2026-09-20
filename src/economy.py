@@ -6,6 +6,11 @@ from typing import Any
 
 from src.governance import EnginePolicy
 
+# Population unit: 万人 (10,000 people). Keep in sync with historical_track.
+DEFAULT_POPULATION_MAN = 1220.0
+LEGACY_ABSTRACT_POP = 12000.0
+STOCK_SCALE = DEFAULT_POPULATION_MAN / LEGACY_ABSTRACT_POP
+
 
 DAYS_PER_MONTH = 30
 # ~2 month shelf life for fresh beans (was 0.1 → 100%/mo, stocks never persisted).
@@ -20,7 +25,8 @@ PROCESSING_RATIO = 0.8
 ANKO_PROCESSING_RATIO = 0.75
 BASE_FOOD_CONSUMPTION = 0.03
 MONTHLY_SUBSISTENCE = 0.032
-POPULATION_FLOOR = 500.0
+# Floor in 万人 (~2M people); prevents total wipe while staying below Edo lows.
+POPULATION_FLOOR = 200.0
 
 # Legacy shared harvest window (kept for callers / docs).
 HARVEST_MONTHS = {8, 9, 10}
@@ -31,7 +37,7 @@ RICE_HARVEST_MONTHS = {8, 9, 10}
 EDAMAME_HARVEST_MONTHS = {7, 8, 9}
 AZUKI_HARVEST_MONTHS = {9, 10, 11}
 
-# Base yield per harvest month (procedural overnight model; not real climate data).
+# Base yield per harvest month at legacy abstract pop=12000 (scaled by 万人).
 RICE_BASE_YIELD = 520.0
 EDAMAME_BASE_YIELD = 48.0
 AZUKI_BASE_YIELD = 40.0
@@ -47,12 +53,12 @@ EDAMAME_COLD_PENALTY = 0.40
 AZUKI_COLD_PENALTY = 0.30
 
 # Off-season trickle so side markets never fully dry up.
-OFF_SEASON_EDAMAME_TRICKLE = 3.0
-OFF_SEASON_AZUKI_TRICKLE = 2.5
+OFF_SEASON_EDAMAME_TRICKLE = 3.0 * STOCK_SCALE
+OFF_SEASON_AZUKI_TRICKLE = 2.5 * STOCK_SCALE
 
 # Side-market auto-processing caps (edo_metal path).
 SIDE_PROCESS_RATIO = 0.05
-SIDE_PROCESS_CAP = 20.0
+SIDE_PROCESS_CAP = 20.0 * STOCK_SCALE
 YIELD_FLOOR = 0.05
 
 
@@ -82,9 +88,9 @@ def getEpoch(year: int) -> str:
 class EconomyState:
   year: int
   month: int
-  population: float = 12000.0
-  foodBuffer: float = 2000.0
-  sugarStock: float = 300.0
+  population: float = DEFAULT_POPULATION_MAN
+  foodBuffer: float = 2000.0 * STOCK_SCALE
+  sugarStock: float = 300.0 * STOCK_SCALE
   # Legacy pool; kept in sync as edamameStock + azukiStock for old checkpoints / laws.
   rawBeans: float = 0.0
   edamameStock: float = 0.0
@@ -94,7 +100,7 @@ class EconomyState:
   ankoReserve: float = 0.0
   ankoNotes: float = 0.0
   azukiNotes: float = 0.0
-  riceKoku: float = 1000.0
+  riceKoku: float = 1000.0 * STOCK_SCALE
   goldRyo: float = 200.0
   silverMonme: float = 4000.0
   hanSatsu: float = 500.0
@@ -143,9 +149,9 @@ class EconomyState:
     state = cls(
       year=int(data["year"]),
       month=int(data["month"]),
-      population=float(data.get("population", 12000)),
-      foodBuffer=float(data.get("foodBuffer", 2000)),
-      sugarStock=float(data.get("sugarStock", 300)),
+      population=float(data.get("population", DEFAULT_POPULATION_MAN)),
+      foodBuffer=float(data.get("foodBuffer", 2000.0 * STOCK_SCALE)),
+      sugarStock=float(data.get("sugarStock", 300.0 * STOCK_SCALE)),
       rawBeans=edamameStock + azukiStock,
       edamameStock=edamameStock,
       azukiStock=azukiStock,
@@ -154,7 +160,7 @@ class EconomyState:
       ankoReserve=float(data.get("ankoReserve", 0)),
       ankoNotes=float(data.get("ankoNotes", 0)),
       azukiNotes=float(data.get("azukiNotes", 0)),
-      riceKoku=float(data.get("riceKoku", 1000)),
+      riceKoku=float(data.get("riceKoku", 1000.0 * STOCK_SCALE)),
       goldRyo=float(data.get("goldRyo", 200)),
       silverMonme=float(data.get("silverMonme", 4000)),
       hanSatsu=float(data.get("hanSatsu", 500)),
@@ -241,10 +247,12 @@ def advanceMonth(year: int, month: int) -> tuple[int, int]:
 
 def harvestCrops(economy: EconomyState, disasterMultiplier: float) -> tuple[float, float, float]:
   """Apply per-crop harvest inflows; returns (rice, edamame, azuki) amounts this month."""
+  from src.historical_track import scaledCropBase
+
   riceHarvest = 0.0
   if economy.month in RICE_HARVEST_MONTHS:
     riceHarvest = cropYield(
-      RICE_BASE_YIELD,
+      scaledCropBase(RICE_BASE_YIELD, economy.population),
       economy.climateIndex,
       disasterMultiplier,
       RICE_CLIMATE_SENSITIVITY,
@@ -284,10 +292,12 @@ def processAnko(economy: EconomyState, ratio: float) -> float:
 
 def harvestBeanCrops(economy: EconomyState, disasterMultiplier: float) -> tuple[float, float]:
   """Edamame / azuki inflows only (rice is handled separately on edo_metal)."""
+  from src.historical_track import scaledCropBase
+
   climateIndex = economy.climateIndex
   if economy.month in EDAMAME_HARVEST_MONTHS:
     edamameHarvest = cropYield(
-      EDAMAME_BASE_YIELD,
+      scaledCropBase(EDAMAME_BASE_YIELD, economy.population),
       climateIndex,
       disasterMultiplier,
       EDAMAME_CLIMATE_SENSITIVITY,
@@ -299,7 +309,7 @@ def harvestBeanCrops(economy: EconomyState, disasterMultiplier: float) -> tuple[
 
   if economy.month in AZUKI_HARVEST_MONTHS:
     azukiHarvest = cropYield(
-      AZUKI_BASE_YIELD,
+      scaledCropBase(AZUKI_BASE_YIELD, economy.population),
       climateIndex,
       disasterMultiplier,
       AZUKI_CLIMATE_SENSITIVITY,
@@ -342,10 +352,12 @@ def simulateEdoMetalMonth(
   crowdHoarding: float,
 ) -> MonthResult:
   result = MonthResult()
+  from src.historical_track import scaledCropBase
+
   riceHarvest = 0.0
   if economy.month in RICE_HARVEST_MONTHS:
     riceHarvest = cropYield(
-      RICE_BASE_YIELD,
+      scaledCropBase(RICE_BASE_YIELD, economy.population),
       economy.climateIndex,
       disasterMultiplier,
       RICE_CLIMATE_SENSITIVITY,
@@ -448,12 +460,13 @@ def simulateDollarMonth(
 ) -> MonthResult:
   """Real harvest like metal; money is dollar notes/reserves. FX stub, not calibrated CPI."""
   from src.dollar_fx import fxYenPerDollar
+  from src.historical_track import scaledCropBase
 
   result = MonthResult()
   riceHarvest = 0.0
   if economy.month in RICE_HARVEST_MONTHS:
     riceHarvest = cropYield(
-      RICE_BASE_YIELD,
+      scaledCropBase(RICE_BASE_YIELD, economy.population),
       economy.climateIndex,
       disasterMultiplier,
       RICE_CLIMATE_SENSITIVITY,

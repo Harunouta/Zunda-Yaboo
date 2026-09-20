@@ -11,6 +11,7 @@ from src.crowd_mood import buildBehaviorLog, dryRunCrowd, summarizePolicy
 from src.economy import (
   EconomyState,
   MonetaryStandard,
+  STOCK_SCALE,
   advanceMonth,
   climateForMonth,
   getEpoch,
@@ -106,9 +107,9 @@ PRICE_SHOCK_MIN_REL = 0.15
 PRICE_SHOCK_MIN_ABS = 0.05
 PRICE_SHOCK_PERCENTILE = 0.99
 COMMODITY_STANDARDS = {"zunda", "anko", "azuki"}
-POP_CATCHUP_RATE = 0.04
-STARVE_CATCHUP_SCALE = 0.35
-NEW_MOUTH_FOOD = 2.5
+POP_CATCHUP_RATE = 0.09
+STARVE_CATCHUP_SCALE = 0.55
+NEW_MOUTH_FOOD = 3.0
 LEGIT_CATCHUP_RATE = 0.22
 GOLD_SILVER_CATCHUP_RATE = 0.04
 HISTORY_STANDARDS = {
@@ -481,7 +482,6 @@ def runMonthlySimulation(
   monetary = MonetaryStandard(standard)
   startYear, startMonth = parseYearMonth(start)
   endYear, endMonth = parseYearMonth(end)
-  initialPopulation = 12000.0
 
   if resume and checkpointPath.exists():
     economy, governance, turn, meta = loadCheckpoint(checkpointPath)
@@ -490,22 +490,22 @@ def runMonthlySimulation(
   else:
     economy = EconomyState(year=startYear, month=startMonth, monetaryStandard=monetary)
     # Both sweets exist since bakufu founding (watchable markets).
-    economy.processedZunda = 200.0
-    economy.ankoReserve = 180.0
+    economy.processedZunda = 200.0 * STOCK_SCALE
+    economy.ankoReserve = 180.0 * STOCK_SCALE
     if monetary == MonetaryStandard.ANKO:
-      economy.sugarStock = 450.0
+      economy.sugarStock = 450.0 * STOCK_SCALE
     if monetary == MonetaryStandard.AZUKI:
-      economy.azukiStock = 220.0
-      economy.azukiNotes = 80.0
+      economy.azukiStock = 220.0 * STOCK_SCALE
+      economy.azukiNotes = 80.0 * STOCK_SCALE
     if monetary == MonetaryStandard.EDO_METAL:
-      economy.foodBuffer = 2500.0
-      economy.riceKoku = 1200.0
+      economy.foodBuffer = 2500.0 * STOCK_SCALE
+      economy.riceKoku = 1200.0 * STOCK_SCALE
     if monetary == MonetaryStandard.DOLLAR:
-      economy.foodBuffer = 2500.0
-      economy.riceKoku = 1200.0
-      economy.dollarNotes = 1200.0
-      economy.dollarReserves = 900.0
-      economy.sugarStock = 400.0
+      economy.foodBuffer = 2500.0 * STOCK_SCALE
+      economy.riceKoku = 1200.0 * STOCK_SCALE
+      economy.dollarNotes = 1200.0 * STOCK_SCALE
+      economy.dollarReserves = 900.0 * STOCK_SCALE
+      economy.sugarStock = 400.0 * STOCK_SCALE
     governance = GovernanceState()
     turn = 0
     meta = {
@@ -749,10 +749,14 @@ def runMonthlySimulation(
 
     if historicalPolicy:
       histTarget = getHistoricalTarget(economy.year, economy.month)
-      targetPop = initialPopulation * float(histTarget.populationIndex)
+      targetPop = float(histTarget.populationMan)
       starveScale = STARVE_CATCHUP_SCALE if monthResult.starvationDeaths > 0.0 else 1.0
+      catchupRate = POP_CATCHUP_RATE
+      # Postwar census climb is steep; allow a faster pull toward 万人 anchors.
+      if economy.year >= 1945:
+        catchupRate = max(catchupRate, 0.14)
       beforePop = economy.population
-      economy.population += (targetPop - economy.population) * POP_CATCHUP_RATE * starveScale
+      economy.population += (targetPop - economy.population) * catchupRate * starveScale
       gained = economy.population - beforePop
       if gained > 0.0:
         economy.foodBuffer += gained * NEW_MOUTH_FOOD
@@ -901,12 +905,11 @@ def runMonthlySimulation(
     )
     histTarget = getHistoricalTarget(economy.year, economy.month)
     riceScarcityProxy = 1.0 / max(float(disasterMultiplier), 0.25)
-    popIndex = economy.population / initialPopulation
     fidelity = scoreHistoricalFidelity(
       riceScarcityProxy,
       economy.goldSilverRatio,
       governance.legitimacy,
-      popIndex,
+      economy.population,
       histTarget,
     )
 

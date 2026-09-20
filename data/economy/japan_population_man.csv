@@ -1,0 +1,28 @@
+year,month,populationMan,evidence,note
+1600,1,1200,estimate,early Edo often cited ~12 million
+1603,1,1220,estimate,bakufu founding era
+1650,1,1750,estimate,mid-17c growth
+1721,1,3128,real_approx,Tokugawa survey figures often cited ~31.28M
+1750,1,3100,estimate,Edo plateau
+1798,1,2850,estimate,late-18c after famines
+1830,1,2730,estimate,Tenpo-era trough band
+1846,1,2690,estimate,late bakufu
+1872,1,3311,real_approx,early Meiji population counts ~33.1M
+1890,1,3990,real_approx,pre-census modernizing
+1900,1,4385,real_approx,~43.8M
+1920,10,5596,real,first modern census 55.96M
+1930,10,6445,real,1930 census
+1940,10,7311,real,1940 census
+1945,8,7215,real_approx,war-end trough ~72M
+1950,10,8411,real,1950 census
+1960,10,9430,real,1960 census
+1970,10,10372,real,1970 census 103720060
+1971,8,10510,inferred_interp,linear between 1970 and 1975 censuses; Nixon shock month
+1975,10,11194,real,1975 census
+1980,10,11706,real,1980 census
+1990,10,12361,real,1990 census
+2000,10,12693,real,2000 census
+2010,10,12806,real,2010 census
+2015,10,12709,real,2015 census
+2020,10,12615,real,2020 census
+2026,8,12340,estimate,present toy endpoint ~123.4M

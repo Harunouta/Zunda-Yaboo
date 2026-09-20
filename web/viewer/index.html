@@ -111,14 +111,14 @@
       <p id="rangeMeta" class="hint"></p>
       <p class="hint">大きな変化＝イベントあり、本位の切替、人口±0.8%、食/人円±12%、fidelity±0.04、米価±15% のいずれか。</p>
       <p class="hint">グラフの凸凹をクリックすると、その年のイベント一覧へ飛びます（点は間引き年です）。</p>
-      <h3>人口（年次ざっくり）</h3>
-      <p class="hint">マクロ人口の年中央値。出生・死亡・移動の月次更新を、年でならしたもの。</p>
+      <h3>人口（年次ざっくり・万人）</h3>
+      <p class="hint">マクロ人口の年中央値（単位は万人＝1万人）。例: 1970年≈10372、いま≈12300。出生・死亡・移動の月次更新を年でならしたもの。</p>
       <canvas id="chartPop" width="720" height="160"></canvas>
       <h3>食/人円（年次中央値）</h3>
       <p class="hint">時代ごとの食バスケット円 ×（穀物在庫月数 ÷ 目安6ヶ月）。バッファkgをそのまま円にしていない。method=<code>era_basket_times_grain_stock</code>。</p>
       <canvas id="chartFood" width="720" height="180"></canvas>
       <h3>fidelity</h3>
-      <p class="hint">史実アンカーとの近さ（1に近いほど一致）。誤差は米の対数差×0.35＋金銀比×0.25＋正統性×0.20＋人口指数×0.20。score＝max(0, 1−誤差)。historical ラン向け。</p>
+      <p class="hint">史実アンカーとの近さ（1に近いほど一致）。誤差は米の対数差×0.35＋金銀比×0.25＋正統性×0.20＋人口（万人）×0.20。score＝max(0, 1−誤差)。historical ラン向け。</p>
       <canvas id="chartFid" width="720" height="160"></canvas>
       <h3 id="chartPriceTitle">米・主貨価格（sim）</h3>
       <p id="chartPriceHint" class="hint">シミュ内部の相対価格。米 1.0 をだいたい米1kg相当として、主貨（ずんだ／あんこ／小豆）はランの本位に合わせて出す。現代円は PPP 側。</p>
