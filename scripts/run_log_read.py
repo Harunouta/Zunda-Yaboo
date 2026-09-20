@@ -80,7 +80,7 @@ MAJOR_NOTE_NEEDLES = (
 )
 BLURB_MAX_CHARS = 80
 STEM_PATTERN = "^[A-Za-z0-9._-]+$"
-INDEX_VERSION = 3
+INDEX_VERSION = 4
 POP_SWING_RATIO = 0.008
 FOOD_SWING_RATIO = 0.12
 FIDELITY_SWING = 0.04
@@ -332,10 +332,15 @@ def buildIndex(logPath: Path) -> dict:
       row = json.loads(line)
       yearMonth = str(row.get("yearMonth") or "")
       events = _visibleEvents(row)
-      speech = str(
-        (row.get("behavior") or {}).get("mascotSpeech")
+      behavior = row.get("behavior") or {}
+      llm = row.get("llm") or {}
+      mascotSpeech = str(
+        behavior.get("mascotSpeech")
         or (row.get("crowd") or {}).get("mascotSpeech")
         or ""
+      ).strip()
+      publicSpeech = str(
+        behavior.get("publicSpeech") or llm.get("publicSpeech") or ""
       ).strip()
       metrics = _rowMetrics(row)
       bigChange = _bigChange(
@@ -350,7 +355,7 @@ def buildIndex(logPath: Path) -> dict:
           "offset": offset,
           "eventCount": len(events),
           "events": events,
-          "hasSpeech": bool(speech),
+          "hasSpeech": bool(mascotSpeech or publicSpeech),
           "blurb": _blurbFromRow(row),
           "bigChange": bigChange,
           "population": metrics["population"],
@@ -685,6 +690,9 @@ def yearTrace(stem: str, year: int) -> dict:
           "yearMonth": view["yearMonth"],
           "events": view["events"],
           "decree": view["decree"],
+          "rulerReason": view.get("rulerReason") or "",
+          "publicSpeech": view.get("publicSpeech") or "",
+          "speechSource": view.get("speechSource") or "none",
           "mascotSpeech": view["mascotSpeech"],
           "moodText": view["moodText"],
           "rumor": view["rumor"],

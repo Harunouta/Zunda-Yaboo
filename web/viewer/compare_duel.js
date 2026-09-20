@@ -363,6 +363,10 @@ function renderMacroColumn(pack, data, other) {
   const dl = document.createElement("dl");
   const entries = [
     ["events", (data.events || []).join(" / ")],
+    ["decree", data.decree],
+    ["publicSpeech", data.publicSpeech],
+    ["speechSource", data.publicSpeech ? (data.speechSource || "none") : null],
+    ["mascot", `${data.mascotId || ""} ${data.mascotSpeech || ""}`.trim()],
     ["population", data.population],
     ["foodYen", data.purchasingPower && data.purchasingPower.foodYenPerCapita],
     [`rice / ${spec.labelJa}`, `${formatNum(prices.ricePrice)} / ${formatNum(prices[spec.field])}`],
@@ -370,10 +374,12 @@ function renderMacroColumn(pack, data, other) {
     ["avgPanic", data.avgPanic],
   ];
   for (const [label, value] of entries) {
+    if (value == null) continue;
+    if (label === "publicSpeech" && !data.publicSpeech) continue;
     const dt = document.createElement("dt");
     dt.textContent = label;
     const dd = document.createElement("dd");
-    dd.textContent = value == null || value === "" ? "—" : String(value);
+    dd.textContent = value === "" ? "—" : String(value);
     if (other && label === "population" && typeof value === "number" && typeof other.population === "number") {
       const delta = document.createElement("div");
       delta.className = "macroDelta";

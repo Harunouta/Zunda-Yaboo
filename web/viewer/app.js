@@ -755,11 +755,16 @@ async function loadYearTrace() {
     block.className = "year-month";
     const speech = month.mascotSpeech || "";
     const decree = month.decree || "";
+    const publicSpeech = month.publicSpeech || "";
+    const speechBit = publicSpeech
+      ? `演説[${month.speechSource || "none"}]:${publicSpeech.slice(0, 60)}`
+      : "演説:—";
     const rumor = month.rumor || "";
     const opinions = (month.opinionAgents || [])
       .map((agent) => `${agent.agentId || ""}:${agent.intent || ""} ${agent.rumor || ""}`)
       .join(" / ");
-    block.textContent = `${month.yearMonth} 布告:${decree} ずんだ:${speech} 噂:${rumor} 世論:${opinions}`;
+    block.textContent =
+      `${month.yearMonth} 布告:${decree} ${speechBit} ずんだ:${speech} 噂:${rumor} 世論:${opinions}`;
     yearTraceBox.appendChild(block);
   }
   if (!(data.months || []).length) {

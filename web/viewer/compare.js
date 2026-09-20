@@ -702,12 +702,21 @@ function fillMonthColumn(host, data, pack) {
   const prices = data.prices || {};
   const rows = [
     ["events", (data.events || []).join(" / ")],
+    ["decree", data.decree],
+    ["rulerReason", data.rulerReason],
+    ["publicSpeech", data.publicSpeech],
+    ["speechSource", data.publicSpeech ? (data.speechSource || "none") : ""],
+    ["mascot", `${data.mascotId || ""} ${data.mascotSpeech || ""}`.trim()],
+    ["mood", data.moodText],
+    ["rumor", data.rumor],
     ["population", data.population],
     ["foodYen", data.purchasingPower && data.purchasingPower.foodYenPerCapita],
     ["fidelity", data.fidelity],
     [`rice / ${priceSpec.labelJa}`, `${prices.ricePrice} / ${prices[priceSpec.field]}`],
   ];
   for (const [label, value] of rows) {
+    if (label === "speechSource" && !data.publicSpeech) continue;
+    if (label === "publicSpeech" && !data.publicSpeech) continue;
     const dt = document.createElement("dt");
     dt.textContent = label;
     const dd = document.createElement("dd");
@@ -813,8 +822,15 @@ async function loadYearTrace() {
       );
       const lines = (data.months || []).map((month) => {
         const events = (month.events || []).join(" / ");
-        const extra = month.decree || "";
-        return extra ? `${month.yearMonth}  ${events}  ${extra}` : `${month.yearMonth}  ${events}`;
+        const decree = month.decree || "";
+        const speech = month.publicSpeech || "";
+        const speechTag = speech
+          ? `演説[${month.speechSource || "none"}]:${speech.slice(0, 48)}`
+          : "";
+        const mascot = month.mascotSpeech || "";
+        return [month.yearMonth, events, decree, speechTag, mascot]
+          .filter(Boolean)
+          .join("  ");
       });
       body.textContent = lines.join("\n") || "その年の月はないのだ";
     } catch (error) {
