@@ -45,9 +45,12 @@ yearMonth,eventId,scope,notes
 1956-11,suez_crisis,world,スエズ危機
 1965-03,vietnam_escalation,world,ベトナム戦争拡大期
 1971-08,nixon_shock,world,ニクソン・ショック
+1971-12,smithsonian_peg_1971,world,スミソニアン協定
+1973-02,yen_float_1973,world,円の変動相場制移行
 1973-10,opec_embargo,world,OPEC石油禁輸
 1979-02,iranian_revolution_oil,world,イラン革命・第二次オイルショック入口
 1985-09,plaza_accord_echo,world,プラザ合意（世界側）
+1987-02,louvre_accord_echo,world,ルーブル合意（世界側）
 1987-10,black_monday_1987,world,ブラックマンデー
 1991-12,soviet_collapse,world,ソ連解体
 1997-07,asian_financial_crisis,world,アジア通貨危機（タイ・バーツ）

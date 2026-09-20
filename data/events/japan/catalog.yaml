@@ -100,8 +100,11 @@ oil_shock:
   worldEffect: oil_spike
 plaza_accord:
   scope: japan
-  promptForLeader: プラザ合意。円高と輸出産業への打撃に備えよ。
+  promptForLeader: プラザ合意。協調介入でドル安・円高を誘導する局面だ。輸出と国内信用のバランスを取れ。
   promptForOpinionLeader: 円が高くなった。商売が厳しい。
+  fxInterventionDirection: sell_dollar
+  fxInterventionStrength: 0.65
+  notes: Plaza Accord 1985-09. Policy FX intervention (event month only).
 bubble_burst:
   scope: japan
   promptForLeader: バブル崩壊。不良債権と信用収縮をどう抑える？
@@ -118,6 +121,9 @@ covid:
   scope: japan
   promptForLeader: コロナ禍。経済活動と救済のバランスを取れ。
   promptForOpinionLeader: 外出自粛。店が閉まる。不安が広がる。
+  epidemicSeverity: 0.04
+  socialUnrest: 0.08
+  notes: COVID period toy shock; severity kept small vs famine (Japan excess deaths << classical famine shocks).
 dutch_perry_warning:
   scope: japan_info
   promptForLeader: 長崎経由のオランダ風説：アメリカ艦隊が日本へ向け出航したとの通報がある。備えは十分か。
@@ -2886,19 +2892,19 @@ covid_19_start:
   scope: japan
   promptForLeader: 新型コロナウイルス感染症（国内初確認）。感染拡大を抑え、民の不安と経済の停滞を両立して扱え。
   promptForOpinionLeader: 病の噂が先に走る。外に出るのが怖い。
-  epidemicSeverity: 0.2
+  epidemicSeverity: 0.05
   notes: 新型コロナウイルス感染症（国内初確認）
 covid_19_delta:
   scope: japan
   promptForLeader: 新型コロナ第5波（デルタ株）流行。感染拡大を抑え、民の不安と経済の停滞を両立して扱え。
   promptForOpinionLeader: 病の噂が先に走る。外に出るのが怖い。
-  epidemicSeverity: 0.22
+  epidemicSeverity: 0.06
   notes: 新型コロナ第5波（デルタ株）流行
 covid_19_omicron:
   scope: japan
   promptForLeader: 新型コロナ第6波（オミクロン株）流行。感染拡大を抑え、民の不安と経済の停滞を両立して扱え。
   promptForOpinionLeader: 病の噂が先に走る。外に出るのが怖い。
-  epidemicSeverity: 0.15
+  epidemicSeverity: 0.04
   notes: 新型コロナ第6波（オミクロン株）流行
 hoei_earthquake:
   scope: japan

@@ -1,0 +1,28 @@
+year,month,annualPct,kind,evidence,note
+1707,1,12.5,private_daimyo_loan,estimate,Konoike-era daimyo loan band ~12.5% (literature anchor)
+1735,1,4.5,private_mortgage_osaka,estimate,Osaka house-collateral loans ~4.2-4.8% pa
+1835,1,4.2,private_mortgage_osaka,estimate,Osaka house-collateral ~3.6-4.8% pa
+1850,1,7.0,private_mortgage_edo,estimate,Edo mortgage band often cited ~6-8%
+1882,10,10.0,boj_discount,real_approx,BOJ official discount era begins (IMES series)
+1897,10,8.0,boj_discount,inferred_interp,around gold standard adoption
+1914,8,8.0,boj_discount,inferred_interp,WWI era placeholder
+1930,1,5.0,boj_discount,inferred_interp,depression-era placeholder
+1940,1,3.5,boj_discount,inferred_interp,wartime low rates placeholder
+1949,4,5.0,boj_discount,inferred_interp,Dodge-era reconstruction
+1960,1,6.0,boj_discount,inferred_interp,high-growth official rate band
+1970,1,6.0,boj_discount,inferred_interp,pre-Nixon
+1973,2,4.5,boj_discount,inferred_interp,float begins
+1974,1,9.0,boj_discount,real_approx,oil-shock tightening band
+1980,1,7.0,uncollateralized_call_proxy,inferred_interp,late high-growth / oil II
+1985,9,5.0,uncollateralized_call_proxy,inferred_interp,Plaza era
+1987,1,3.0,uncollateralized_call_proxy,inferred_interp,Louvre / bubble build-up
+1990,1,6.0,uncollateralized_call_proxy,real_approx,bubble peak tightening
+1995,1,1.0,uncollateralized_call_proxy,real_approx,post-bubble easing
+1999,2,0.15,uncollateralized_call_proxy,real_approx,ZIRP era
+2001,3,0.10,uncollateralized_call_proxy,real_approx,QE era low
+2006,7,0.40,uncollateralized_call_proxy,inferred_interp,brief exit
+2008,12,0.30,uncollateralized_call_proxy,inferred_interp,GFC
+2013,4,0.10,uncollateralized_call_proxy,real_approx,Abenomics / QQE
+2016,1,-0.10,uncollateralized_call_proxy,real_approx,negative rate policy
+2024,3,0.10,uncollateralized_call_proxy,real_approx,exit NIRP band
+2026,8,0.50,uncollateralized_call_proxy,inferred_present,toy present endpoint

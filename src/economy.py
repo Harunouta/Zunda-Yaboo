@@ -68,10 +68,48 @@ class MonetaryStandard(str, Enum):
   AZUKI = "azuki"
   EDO_METAL = "edo_metal"
   GOLD_YEN = "gold_yen"
+  # Post-1949 yen + USD FX regimes (domestic unit is yen; not a "dollar standard").
+  YEN_USD_PEG = "yen_usd_peg"
+  SMITHSONIAN_PEG = "smithsonian_peg"
+  YEN_FLOAT = "yen_float"
+  # Legacy alias kept for old CLI / logs; physics match yen_usd_peg.
   DOLLAR = "dollar"
 
 
 STANDARD_CHOICES = tuple(item.value for item in MonetaryStandard)
+
+YEN_FX_STANDARDS = frozenset(
+  {
+    MonetaryStandard.YEN_USD_PEG,
+    MonetaryStandard.SMITHSONIAN_PEG,
+    MonetaryStandard.YEN_FLOAT,
+    MonetaryStandard.DOLLAR,
+  }
+)
+
+
+def isYenFxStandard(standard: MonetaryStandard | str) -> bool:
+  if isinstance(standard, str):
+    try:
+      standard = MonetaryStandard(standard)
+    except ValueError:
+      return False
+  return standard in YEN_FX_STANDARDS
+
+
+def fxRegimeLabel(standard: MonetaryStandard | str) -> str:
+  if isinstance(standard, str):
+    try:
+      standard = MonetaryStandard(standard)
+    except ValueError:
+      return "none"
+  if standard == MonetaryStandard.YEN_USD_PEG or standard == MonetaryStandard.DOLLAR:
+    return "peg360"
+  if standard == MonetaryStandard.SMITHSONIAN_PEG:
+    return "smithsonian"
+  if standard == MonetaryStandard.YEN_FLOAT:
+    return "managed_float"
+  return "none"
 
 
 def getEpoch(year: int) -> str:
@@ -637,7 +675,7 @@ def simulateMonth(
       disasterMultiplier,
       crowdHoarding,
     )
-  if economy.monetaryStandard == MonetaryStandard.DOLLAR:
+  if isYenFxStandard(economy.monetaryStandard):
     return simulateDollarMonth(
       economy,
       policy,
@@ -663,6 +701,6 @@ def reserveBase(economy: EconomyState) -> float:
     return economy.ankoReserve
   if economy.monetaryStandard == MonetaryStandard.AZUKI:
     return economy.azukiStock
-  if economy.monetaryStandard == MonetaryStandard.DOLLAR:
+  if isYenFxStandard(economy.monetaryStandard):
     return economy.dollarReserves
   return economy.riceKoku

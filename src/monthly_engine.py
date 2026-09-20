@@ -9,12 +9,15 @@ from src.checkpoint import loadCheckpoint, saveCheckpoint
 from src.commodity_watch import updateCommodityWatch
 from src.crowd_mood import buildBehaviorLog, dryRunCrowd, summarizePolicy
 from src.economy import (
+  DEFAULT_POPULATION_MAN,
   EconomyState,
   MonetaryStandard,
   STOCK_SCALE,
   advanceMonth,
   climateForMonth,
+  fxRegimeLabel,
   getEpoch,
+  isYenFxStandard,
   reserveBase,
   simulateMonth,
 )
@@ -42,6 +45,7 @@ from src.historical_track import (
   historicalPolicyForMonth,
   scoreHistoricalFidelity,
 )
+from src.interest_rates import creditCostNudge, interestRateForMonth
 from src.law_and_policy import LawAct, PolicyPackage, RulerDecision
 from src.mediators import (
   applyEventPayloads,
@@ -107,6 +111,62 @@ PRICE_SHOCK_MIN_REL = 0.15
 PRICE_SHOCK_MIN_ABS = 0.05
 PRICE_SHOCK_PERCENTILE = 0.99
 COMMODITY_STANDARDS = {"zunda", "anko", "azuki"}
+FX_INTERVENTION_RESERVE_UNIT = 25.0 * STOCK_SCALE
+FX_INTERVENTION_MOVE = 0.08
+
+
+def applyFxInterventionEvents(
+  economy: EconomyState,
+  payloads: list[Any],
+) -> dict[str, Any] | None:
+  """Apply one-shot FX intervention from policy/world events (no always-on loop)."""
+  if not isYenFxStandard(economy.monetaryStandard):
+    return None
+  bestStrength = 0.0
+  bestDirection = ""
+  for payload in payloads:
+    strength = float(getattr(payload, "fxInterventionStrength", 0.0) or 0.0)
+    direction = str(getattr(payload, "fxInterventionDirection", "") or "").strip().lower()
+    if strength > bestStrength and direction:
+      bestStrength = strength
+      bestDirection = direction
+  if bestStrength <= 0.0 or not bestDirection:
+    return None
+
+  fxBefore = float(economy.fxYenPerDollar or 0.0)
+  if fxBefore <= 0.0:
+    from src.dollar_fx import fxYenPerDollar as lookupFx
+
+    fxBefore = lookupFx(economy.year, economy.month)
+    economy.fxYenPerDollar = fxBefore
+
+  move = FX_INTERVENTION_MOVE * bestStrength
+  if bestDirection == "sell_dollar":
+    economy.fxYenPerDollar = fxBefore * (1.0 - move)
+    economy.dollarReserves = max(
+      0.0,
+      float(economy.dollarReserves) - bestStrength * FX_INTERVENTION_RESERVE_UNIT,
+    )
+  elif bestDirection == "buy_dollar":
+    economy.fxYenPerDollar = fxBefore * (1.0 + move)
+    economy.dollarReserves = float(economy.dollarReserves) + bestStrength * FX_INTERVENTION_RESERVE_UNIT
+  elif bestDirection == "defend_peg":
+    from src.dollar_fx import fxYenPerDollar as lookupFx
+
+    peg = lookupFx(economy.year, economy.month)
+    blend = 0.35 + 0.45 * bestStrength
+    economy.fxYenPerDollar = fxBefore + (peg - fxBefore) * blend
+  else:
+    return None
+
+  return {
+    "direction": bestDirection,
+    "strength": round(bestStrength, 3),
+    "fxBefore": round(fxBefore, 2),
+    "fxAfter": round(float(economy.fxYenPerDollar), 2),
+  }
+
+
 POP_CATCHUP_RATE = 0.09
 STARVE_CATCHUP_SCALE = 0.55
 NEW_MOUTH_FOOD = 3.0
@@ -115,6 +175,9 @@ GOLD_SILVER_CATCHUP_RATE = 0.04
 HISTORY_STANDARDS = {
   MonetaryStandard.EDO_METAL,
   MonetaryStandard.GOLD_YEN,
+  MonetaryStandard.YEN_USD_PEG,
+  MonetaryStandard.SMITHSONIAN_PEG,
+  MonetaryStandard.YEN_FLOAT,
   MonetaryStandard.DOLLAR,
 }
 
@@ -126,8 +189,8 @@ def defaultDecision(standard: MonetaryStandard, year: int, month: int, events: l
     target = "ankoNotes"
   elif standard == MonetaryStandard.AZUKI:
     target = "azukiNotes"
-  elif standard == MonetaryStandard.DOLLAR:
-    target = "dollarNotes"
+  elif isYenFxStandard(standard):
+    target = "yenNotes"
   else:
     target = "rice"
 
@@ -171,11 +234,11 @@ def defaultDecision(standard: MonetaryStandard, year: int, month: int, events: l
   if year >= 1868:
     processRatio = 0.65
     taxRate = min(taxRate, 0.14)
-  if standard == MonetaryStandard.DOLLAR:
+  if isYenFxStandard(standard):
     tradeOpen = year >= 1949
     return RulerDecision(
       law=LawAct(
-        decree=decree if events else "ドル建て財政と輸入の月次管理",
+        decree=decree if events else "円建て財政と輸入の月次管理",
         targetItem=target,
         taxRate=min(taxRate, 0.18) if year >= 1949 else taxRate,
         penalty=penalty,
@@ -482,6 +545,10 @@ def runMonthlySimulation(
   monetary = MonetaryStandard(standard)
   startYear, startMonth = parseYearMonth(start)
   endYear, endMonth = parseYearMonth(end)
+  if followRegimes:
+    from src.monetary_regimes import standardForMonth
+
+    monetary = standardForMonth(f"{startYear:04d}-{startMonth:02d}")
 
   if resume and checkpointPath.exists():
     economy, governance, turn, meta = loadCheckpoint(checkpointPath)
@@ -500,12 +567,18 @@ def runMonthlySimulation(
     if monetary == MonetaryStandard.EDO_METAL:
       economy.foodBuffer = 2500.0 * STOCK_SCALE
       economy.riceKoku = 1200.0 * STOCK_SCALE
-    if monetary == MonetaryStandard.DOLLAR:
+    if isYenFxStandard(monetary):
       economy.foodBuffer = 2500.0 * STOCK_SCALE
       economy.riceKoku = 1200.0 * STOCK_SCALE
       economy.dollarNotes = 1200.0 * STOCK_SCALE
       economy.dollarReserves = 900.0 * STOCK_SCALE
       economy.sugarStock = 400.0 * STOCK_SCALE
+    if historicalPolicy or followRegimes:
+      histStart = getHistoricalTarget(startYear, startMonth)
+      economy.population = float(histStart.populationMan)
+      popScale = max(economy.population, 1.0) / DEFAULT_POPULATION_MAN
+      economy.foodBuffer = max(economy.foodBuffer, 2500.0 * STOCK_SCALE * popScale)
+      economy.riceKoku = max(economy.riceKoku, 1200.0 * STOCK_SCALE * popScale)
     governance = GovernanceState()
     turn = 0
     meta = {
@@ -747,6 +820,15 @@ def runMonthlySimulation(
     )
     monthResult.events = list(dict.fromkeys(events + monthResult.events + effective.warnings))
 
+    fxInterventionLog = applyFxInterventionEvents(economy, eventPayloads)
+    rateInfo = interestRateForMonth(economy.year, economy.month)
+    creditNudge = creditCostNudge(rateInfo.get("policyRateAnnualPct"))
+    if creditNudge > 0.0:
+      nationalMed["importCostShock"] = min(
+        1.0,
+        float(nationalMed.get("importCostShock") or 0.0) + creditNudge * 0.15,
+      )
+
     if historicalPolicy:
       histTarget = getHistoricalTarget(economy.year, economy.month)
       targetPop = float(histTarget.populationMan)
@@ -755,12 +837,20 @@ def runMonthlySimulation(
       # Postwar census climb is steep; allow a faster pull toward 万人 anchors.
       if economy.year >= 1945:
         catchupRate = max(catchupRate, 0.14)
+      # After the 2010 peak, keep catchup responsive when below census track.
+      if economy.year >= 2010:
+        if economy.population < targetPop * 0.97:
+          catchupRate = max(catchupRate, 0.18)
+        elif economy.population < targetPop * 0.99:
+          catchupRate = max(catchupRate, 0.12)
+        else:
+          catchupRate = min(catchupRate, 0.06)
       beforePop = economy.population
       economy.population += (targetPop - economy.population) * catchupRate * starveScale
       gained = economy.population - beforePop
       if gained > 0.0:
         economy.foodBuffer += gained * NEW_MOUTH_FOOD
-      if liveStandard != MonetaryStandard.DOLLAR:
+      if not isYenFxStandard(liveStandard):
         economy.goldSilverRatio += (
           float(histTarget.goldSilverRatio) - economy.goldSilverRatio
         ) * GOLD_SILVER_CATCHUP_RATE
@@ -933,6 +1023,8 @@ def runMonthlySimulation(
       "epoch": epoch,
       "monetaryStandard": liveStandard.value,
       "regimeChange": regimeChange,
+      "fxIntervention": fxInterventionLog,
+      "interestRate": rateInfo,
       "macro": {
         "population": round(economy.population, 1),
         "foodBuffer": round(economy.foodBuffer, 1),
@@ -958,9 +1050,13 @@ def runMonthlySimulation(
         "hanSatsu": round(economy.hanSatsu, 1),
         "hanSatsuCredit": round(economy.hanSatsuCredit, 3),
         "goldSilverRatio": round(economy.goldSilverRatio, 3),
+        "moneyUnit": "円" if isYenFxStandard(liveStandard) else "sim",
+        "yenNotes": round(economy.dollarNotes, 1),
+        "yenReserves": round(economy.dollarReserves, 1),
         "dollarNotes": round(economy.dollarNotes, 1),
         "dollarReserves": round(economy.dollarReserves, 1),
         "fxYenPerDollar": round(economy.fxYenPerDollar, 2),
+        "fxRegime": fxRegimeLabel(liveStandard),
       },
       "prices": prices.toDict(),
       "purchasingPower": purchasingPower.toDict(),

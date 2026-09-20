@@ -63,6 +63,9 @@ class EventPayload:
   importCostShock: float = 0.0
   exportDrain: float = 0.0
   fiatTrustShock: float = 0.0
+  # FX intervention policy shocks (event months only; no always-on intervention).
+  fxInterventionDirection: str = ""
+  fxInterventionStrength: float = 0.0
 
 
 def _optionalFloat(value: Any) -> float | None:
@@ -133,6 +136,8 @@ def _legacyMediatorFields(entry: dict, eventId: str, notes: str) -> dict[str, fl
   exportDrain = _floatOrZero(entry.get("exportDrain"))
   fiatTrustShock = _floatOrZero(entry.get("fiatTrustShock"))
   govDemand = _floatOrZero(entry.get("govDemand"))
+  fxInterventionDirection = str(entry.get("fxInterventionDirection") or "").strip().lower()
+  fxInterventionStrength = _floatOrZero(entry.get("fxInterventionStrength"))
   if worldEffect in {"sugar_spike", "oil_spike", "chip_spike"} and importCostShock <= 0.0:
     importCostShock = 0.12 if worldEffect == "oil_spike" else 0.08
   if worldEffect == "gold_outflow" and exportDrain <= 0.0:
@@ -150,6 +155,8 @@ def _legacyMediatorFields(entry: dict, eventId: str, notes: str) -> dict[str, fl
     "importCostShock": importCostShock,
     "exportDrain": exportDrain,
     "fiatTrustShock": fiatTrustShock,
+    "fxInterventionDirection": fxInterventionDirection,
+    "fxInterventionStrength": fxInterventionStrength,
   }
 
 
@@ -189,6 +196,8 @@ def _loadCatalogFile(path: Path) -> dict[str, EventPayload]:
       importCostShock=float(mediators["importCostShock"]),
       exportDrain=float(mediators["exportDrain"]),
       fiatTrustShock=float(mediators["fiatTrustShock"]),
+      fxInterventionDirection=str(mediators.get("fxInterventionDirection") or ""),
+      fxInterventionStrength=float(mediators.get("fxInterventionStrength") or 0.0),
     )
   return catalog
 

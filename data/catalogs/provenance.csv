@@ -1,6 +1,8 @@
 path,evidence,whatIsReal,whatIsInferred
-data/economy/monetary_regimes.csv,mixed,Switch months 1897-10 Gold Standard Law; 1949-04 Dodge Line,How metal/gold/dollar physics map onto those dates
+data/economy/monetary_regimes.csv,mixed,Gold Standard / Dodge peg / Smithsonian / yen float switch months,How metal/gold/yen-FX physics map onto those dates
+data/economy/fx_jpy_per_usd.csv,mixed,Official 360 peg 1949-1971 and well-known later market levels,Monthly interpolation between anchors; 2026-08 is a toy present
 data/economy/japan_population_man.csv,mixed,Census years 1920-2020 and well-cited Edo/Meiji round figures (万人),Pre-1872 estimates and month interpolation (e.g. 1971-08 Nixon)
+data/economy/interest_rate_anchors.csv,mixed,BOJ discount / call proxies where noted; Edo private loan bands from secondary literature,Monthly interpolation; not one continuous policy rate from 1603
 data/events/policies/kit_classes.csv,inferred,None,All harvest/mint/spoil kit deltas are sim knobs
 data/agents/agri_roles.csv,inferred,Area names match founding nodes,Personas and biases are fiction for LLM
 data/agents/crop_calendar.csv,inferred,Winter is slack in Tohoku as a climate cartoon,Labor indices are not MAFF/JMA series

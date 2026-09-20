@@ -80,9 +80,30 @@ vietnam_escalation:
 
 nixon_shock:
   scope: world
-  promptForLeader: ニクソン・ショックでドルと金の兌換が停止。ブレトンウッズ後の為替が宙に浮く。
+  promptForLeader: ニクソン・ショックでドルと金の兌換が停止。ブレトンウッズ後の為替が宙に浮く。防衛介入の是非を判断せよ。
   promptForOpinionLeader: ドルの約束が壊れた、お金の意味が分からない、と騒ぐ。
   worldEffect: gold_outflow
+  fxInterventionDirection: buy_dollar
+  fxInterventionStrength: 0.45
+  fiatTrustShock: 0.08
+  notes: Nixon shock 1971-08. Policy FX intervention event (no always-on intervention).
+
+smithsonian_peg_1971:
+  scope: world
+  promptForLeader: スミソニアン協定で円はおよそ308円台の暫定固定。狭いバンド防衛が課題だ。
+  promptForOpinionLeader: ドルの値段がまた決まった、しばらくは落ち着くのか、と噂。
+  fxInterventionDirection: defend_peg
+  fxInterventionStrength: 0.35
+  notes: Smithsonian Agreement 1971-12.
+
+yen_float_1973:
+  scope: world
+  promptForLeader: 円が変動相場制へ移行した。管理フロート下で介入は例外的な政策判断になる。
+  promptForOpinionLeader: 為替が毎日動く、商売の読みが難しい、と嘆く。
+  fxInterventionDirection: sell_dollar
+  fxInterventionStrength: 0.2
+  fiatTrustShock: 0.03
+  notes: Yen float begins 1973-02.
 
 # --- 18c: Atlantic finance / sugar / war ---
 south_sea_bubble:
@@ -288,9 +309,20 @@ black_monday_1987:
 
 plaza_accord_echo:
   scope: world
-  promptForLeader: プラザ合意でドル高是正が進む。円高・輸出産業・資本フローの前提が変わる（世界側ショック）。
+  promptForLeader: プラザ合意でドル高是正が進む。協調介入（ドル売り）が円高を加速させる局面だ。
   promptForOpinionLeader: ドルが安くなる、輸出が苦しい、と工場の噂。
   worldEffect: gold_outflow
+  fxInterventionDirection: sell_dollar
+  fxInterventionStrength: 0.55
+  notes: Plaza Accord world echo 1985-09.
+
+louvre_accord_echo:
+  scope: world
+  promptForLeader: ルーブル合意で為替の急変動を抑えようとする協調が始まる。過度な円高進行の抑制介入を検討せよ。
+  promptForOpinionLeader: 円高が止まったのか、まだ怖いのか、と噂が割れる。
+  fxInterventionDirection: buy_dollar
+  fxInterventionStrength: 0.4
+  notes: Louvre Accord 1987-02.
 
 soviet_collapse:
   scope: world
@@ -324,8 +356,8 @@ covid_wuhan_alert:
   scope: world
   promptForLeader: 中国武漢で未知の肺炎が広がるとの国際警報。人流・サプライチェーンの初期対応を決めよ。
   promptForOpinionLeader: 大陸で怖い病気、船と飛行機が危ない、と噂が先走る。
-  epidemicSeverity: 0.2
-  populationShock: 0.001
+  epidemicSeverity: 0.05
+  populationShock: 0.0003
 
 ukraine_war_energy:
   scope: world
@@ -339,8 +371,9 @@ covid_lockdown_chain:
   scope: world
   promptForLeader: 世界的ロックダウンで港湾・工場が同時に止まる。サプライチェーンと在庫を防衛せよ。
   promptForOpinionLeader: 世界が閉まる。物が届かない、と怯える。
-  epidemicSeverity: 0.15
+  epidemicSeverity: 0.04
   cropLossExtra: 0.02
+  importCostShock: 0.06
 
 chip_shortage_2021:
   scope: world
