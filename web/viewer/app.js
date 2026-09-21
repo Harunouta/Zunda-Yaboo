@@ -899,6 +899,7 @@ async function launchRun() {
     noLlm: document.getElementById("noLlm").checked,
     historicalPolicy: document.getElementById("historicalPolicy").checked,
     noSpeech: document.getElementById("noSpeech").checked,
+    freedom: document.getElementById("freedom").checked,
     resume: document.getElementById("resume").checked,
     confirmFullSpan: document.getElementById("confirmFullSpan").checked,
   };
@@ -1013,6 +1014,34 @@ function pollJob() {
 
 bindChartClicks();
 initSpanPickers();
+
+const FREEDOM_STANDARDS = new Set(["zunda", "anko", "azuki", "edo_metal"]);
+
+function syncFreedomCheckbox() {
+  const freedomEl = document.getElementById("freedom");
+  const standardEl = document.getElementById("standard");
+  const histEl = document.getElementById("historicalPolicy");
+  if (!freedomEl || !standardEl) return;
+  const eligible = FREEDOM_STANDARDS.has(standardEl.value) && !(histEl && histEl.checked);
+  freedomEl.disabled = !eligible;
+  if (!eligible) freedomEl.checked = false;
+}
+
+document.getElementById("standard").addEventListener("change", syncFreedomCheckbox);
+document.getElementById("historicalPolicy").addEventListener("change", () => {
+  if (document.getElementById("historicalPolicy").checked) {
+    document.getElementById("freedom").checked = false;
+  }
+  syncFreedomCheckbox();
+});
+document.getElementById("freedom").addEventListener("change", () => {
+  if (document.getElementById("freedom").checked) {
+    document.getElementById("historicalPolicy").checked = false;
+  }
+  syncFreedomCheckbox();
+});
+syncFreedomCheckbox();
+
 fillSettings()
   .then(loadRuns)
   .then(loadView)

@@ -102,6 +102,7 @@ def writeRunLaunchMeta(runName: str, body: dict) -> None:
     "noLlm": body.get("noLlm"),
     "historicalPolicy": body.get("historicalPolicy"),
     "noSpeech": body.get("noSpeech"),
+    "freedom": body.get("freedom"),
     "settings": public,
   }
   (runDir / "launch.json").write_text(
@@ -151,6 +152,7 @@ def startJob(body: dict) -> dict:
   noLlm = bool(body.get("noLlm", True))
   historicalPolicy = bool(body.get("historicalPolicy", False))
   noSpeech = bool(body.get("noSpeech", False))
+  freedom = bool(body.get("freedom", False))
   resume = bool(body.get("resume", False))
   confirmFullSpan = bool(body.get("confirmFullSpan", False))
   runName = str(body.get("runName") or "viewer_short")
@@ -158,6 +160,11 @@ def startJob(body: dict) -> dict:
   allowedStandards = list(STANDARD_CHOICES) + ["historical"]
   if standard not in allowedStandards:
     raise ValueError("unknown standard")
+  freedomPool = {"zunda", "anko", "azuki", "edo_metal"}
+  if freedom and (standard not in freedomPool or historicalPolicy):
+    raise ValueError(
+      "--freedom only with zunda/anko/azuki/edo_metal and without --historical-policy"
+    )
   if not YEAR_MONTH_RE.match(start) or not YEAR_MONTH_RE.match(end):
     raise ValueError("start/end must be YYYY-MM")
   if end < start:
@@ -180,6 +187,7 @@ def startJob(body: dict) -> dict:
     "noLlm": noLlm,
     "historicalPolicy": historicalPolicy,
     "noSpeech": noSpeech,
+    "freedom": freedom,
     "resume": resume,
   })
   llmEnv = llm_settings.settingsEnv()
@@ -201,6 +209,8 @@ def startJob(body: dict) -> dict:
     cmd.append("--historical-policy")
   if noSpeech:
     cmd.append("--no-speech")
+  if freedom:
+    cmd.append("--freedom")
   if resume:
     cmd.append("--resume")
 
@@ -257,6 +267,8 @@ def startJob(body: dict) -> dict:
         dockerCmd.append("--historical-policy")
       if noSpeech:
         dockerCmd.append("--no-speech")
+      if freedom:
+        dockerCmd.append("--freedom")
       if resume:
         dockerCmd.append("--resume")
       proc = subprocess.Popen(

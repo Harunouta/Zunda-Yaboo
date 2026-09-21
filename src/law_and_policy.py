@@ -89,13 +89,17 @@ class RulerDecision:
   law: LawAct = field(default_factory=LawAct)
   policy: PolicyPackage = field(default_factory=PolicyPackage)
   activatedPolicyIds: list[str] = field(default_factory=list)
+  nextStandard: str = ""
 
   def toDict(self) -> dict[str, Any]:
-    return {
+    payload = {
       "law": self.law.toDict(),
       "policy": self.policy.toDict(),
       "activatedPolicyIds": list(self.activatedPolicyIds),
     }
+    if self.nextStandard:
+      payload["nextStandard"] = self.nextStandard
+    return payload
 
 
 POLICY_BOUNDS: dict[str, tuple[float, float]] = {
@@ -202,4 +206,12 @@ def parseRulerDecision(raw: dict[str, Any] | list[Any]) -> RulerDecision:
     activated = [str(item) for item in rawIds if str(item).strip()]
   else:
     activated = []
-  return RulerDecision(law=law, policy=policy, activatedPolicyIds=activated)
+  from src.freedom_standard import parseFreedomStandard
+
+  nextStd = parseFreedomStandard(raw.get("nextStandard", raw.get("next_standard", "")))
+  return RulerDecision(
+    law=law,
+    policy=policy,
+    activatedPolicyIds=activated,
+    nextStandard=nextStd.value if nextStd else "",
+  )

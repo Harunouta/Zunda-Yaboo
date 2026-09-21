@@ -51,6 +51,14 @@ def buildParser() -> argparse.ArgumentParser:
     action="store_true",
     help="Disable ruler publicSpeech / heardSpeech (catalog and LLM). Decrees and other LLM stay on.",
   )
+  parser.add_argument(
+    "--freedom",
+    action="store_true",
+    help=(
+      "Allow ruler LLM to switch among zunda/anko/azuki/edo_metal via nextStandard. "
+      "Only with those start standards; ignored with historical / --historical-policy."
+    ),
+  )
   parser.add_argument("--probe", action="store_true", help="Probe LM Studio models and exit")
   parser.add_argument("--validate-baseline", action="store_true", help="Run validity baselines and exit")
   parser.add_argument(
@@ -124,11 +132,28 @@ def main(argv: list[str] | None = None) -> int:
   followRegimes = args.standard == "historical"
   engineStandard = "edo_metal" if followRegimes else args.standard
   historicalPolicy = args.historical_policy or (followRegimes and not args.useLlm)
+  from src.freedom_standard import isFreedomEligibleStandard
+
+  freedom = bool(args.freedom)
+  if freedom:
+    if followRegimes or historicalPolicy:
+      print(
+        "Warning: --freedom ignored with historical / --historical-policy",
+        flush=True,
+      )
+      freedom = False
+    elif not isFreedomEligibleStandard(engineStandard):
+      print(
+        f"Warning: --freedom ignored for standard={engineStandard} "
+        "(pool is zunda/anko/azuki/edo_metal)",
+        flush=True,
+      )
+      freedom = False
   print(
     f"Start standard={args.standard} engine={engineStandard} followRegimes={followRegimes} "
     f"range={args.start}..{args.end} "
     f"llm={args.useLlm} resume={args.resume} historicalPolicy={historicalPolicy} "
-    f"noSpeech={args.noSpeech} "
+    f"noSpeech={args.noSpeech} freedom={freedom} "
     f"opinionLeaders={args.opinion_leaders} opinionParallel={args.opinion_parallel} "
     f"agriLlm={args.agriLlm} agriParallel={args.agri_parallel} "
     f"log={logPath or 'logs/monthly_run.jsonl'}",
@@ -142,6 +167,7 @@ def main(argv: list[str] | None = None) -> int:
     resume=args.resume,
     historicalPolicy=historicalPolicy,
     noSpeech=args.noSpeech,
+    freedom=freedom,
     logPath=logPath,
     seed=args.seed,
     opinionLeaderCount=args.opinion_leaders,

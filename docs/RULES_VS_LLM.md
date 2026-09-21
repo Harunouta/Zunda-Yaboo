@@ -195,6 +195,16 @@ LLM 呼び出しは **推論（inference）** です。月次ループに重み�
 
 `--historical-policy` かつ金属系本位では統治者を呼ばず史実表。`--no-agri-llm` なら農だけルールのまま統治者 LLM を残せます。
 
+### Freedom（`--freedom`）
+
+為政者 LLM が任意に本位を切り替えられるオプション。開始 `--standard` が `zunda` / `anko` / `azuki` / `edo_metal` のときだけ有効。`historical` や `--historical-policy` とは併用不可。
+
+- **切替主体は LLM のみ**（正統性・食料・riotRisk などのルール閾値では発火しない）
+- ruler JSON の任意キー `nextStandard`（プール外・空は無視）
+- 連続切替抑制のため、前回 Freedom 切替から 12 ヶ月未満はエンジン側で無視（行き詰まり検知ではない）
+- `--no-llm` では切替しない（フラグは記録可）
+- ログ: `regimeChange` に `freedom:zunda->anko` など、`llm.freedom` / `llm.nextStandard`
+
 ---
 
 ## `--no-llm`（validate-baseline）

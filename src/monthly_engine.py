@@ -312,13 +312,14 @@ def resolveRuler(
   prompt: str,
   useLlm: bool,
   emitPublicSpeech: bool = False,
+  freedom: bool = False,
 ) -> tuple[RulerDecision, str, str, str]:
   if not useLlm:
     return fallback, "dry_run", "", ""
   try:
     from src.llm_client import callRuler
 
-    decision, meta = callRuler(prompt, emitPublicSpeech=emitPublicSpeech)
+    decision, meta = callRuler(prompt, emitPublicSpeech=emitPublicSpeech, freedom=freedom)
     decreeText = str(decision.law.decree or "").strip()
     if not decreeText or decreeText in (".", "..", "..."):
       decision.law.decree = fallback.law.decree
@@ -541,6 +542,7 @@ def runMonthlySimulation(
   resume: bool = False,
   historicalPolicy: bool = False,
   noSpeech: bool = False,
+  freedom: bool = False,
   logPath: Path | None = None,
   checkpointPath: Path | None = None,
   anomalyPath: Path | None = None,
@@ -603,6 +605,7 @@ def runMonthlySimulation(
       "end": end,
       "historicalPolicy": historicalPolicy,
       "noSpeech": noSpeech,
+      "freedom": freedom,
     }
     logPath.write_text("", encoding="utf-8")
 
@@ -670,6 +673,7 @@ def runMonthlySimulation(
       catalogHit=catalogSpeechHit,
     )
     llmPublicSpeech = ""
+    requestedNextStandard = ""
     if historicalPolicy and liveStandard in HISTORY_STANDARDS:
       decision = decisionFromHistorical(economy.year, economy.month)
       decisionSource = "historical_policy"
@@ -683,13 +687,43 @@ def runMonthlySimulation(
         policyHand=policyHand,
         agriBrief=str(meta.get("lastAgriBrief") or ""),
       )
+      if freedom and useLlm:
+        from src.freedom_standard import freedomPromptAddon
+
+        leaderPrompt = f"{leaderPrompt} {freedomPromptAddon(liveStandard.value)}"
       needLlmSpeech = wantSpeech and useLlm and not catalogSpeechHit
       decision, decisionSource, rulerReason, llmPublicSpeech = resolveRuler(
         fallback,
         leaderPrompt,
         useLlm=useLlm,
         emitPublicSpeech=needLlmSpeech,
+        freedom=bool(freedom and useLlm),
       )
+      requestedNextStandard = str(getattr(decision, "nextStandard", "") or "")
+
+    if freedom and useLlm and requestedNextStandard:
+      from src.freedom_standard import applyFreedomSwitch, parseFreedomStandard
+
+      freedomLabel, newLastYm = applyFreedomSwitch(
+        economy,
+        requested=parseFreedomStandard(requestedNextStandard),
+        yearMonth=yearMonth,
+        lastSwitchYm=str(meta.get("freedomLastSwitchYm") or "") or None,
+      )
+      if freedomLabel:
+        regimeChange = freedomLabel if not regimeChange else f"{regimeChange}|{freedomLabel}"
+        meta["freedomLastSwitchYm"] = newLastYm
+        liveStandard = economy.monetaryStandard
+        wantSpeech = (not noSpeech) and shouldEmitPublicSpeech(
+          yearMonth=yearMonth,
+          events=events,
+          isAbnormal=monthIsAbnormal,
+          regimeChange=regimeChange,
+          hasFxIntervention=hasFxSpeech,
+          useLlm=useLlm,
+          catalogHit=catalogSpeechHit,
+        )
+
     if noSpeech:
       publicSpeech, speechSource, speechId = "", "disabled", ""
     else:
@@ -1162,6 +1196,8 @@ def runMonthlySimulation(
         "crowdPrompt": crowdPrompt,
         "historicalPolicy": historicalPolicy,
         "noSpeech": noSpeech,
+        "freedom": freedom,
+        "nextStandard": requestedNextStandard or None,
         "rulerReason": behavior["rulerReason"],
         "publicSpeech": publicSpeech or None,
         "speechSource": speechSource,

@@ -65,6 +65,7 @@ RULER_SCHEMA: dict[str, Any] = {
     "historicalPolicyIds": {"type": "array", "items": {"type": "string"}},
     "rulerReason": {"type": "string"},
     "publicSpeech": {"type": "string"},
+    "nextStandard": {"type": "string"},
   },
   "required": ["law", "policy"],
 }
@@ -344,6 +345,7 @@ def modelsForRole(role: str) -> list[str]:
 def callRuler(
   userPrompt: str,
   emitPublicSpeech: bool = False,
+  freedom: bool = False,
 ) -> tuple[RulerDecision, dict[str, Any]]:
   speechRule = (
     "Also set publicSpeech: 2-4 Japanese sentences in a quotable broadcast tone "
@@ -351,6 +353,15 @@ def callRuler(
     if emitPublicSpeech
     else "Omit publicSpeech or leave it empty this month (no broadcast)."
   )
+  freedomRule = ""
+  if freedom:
+    from src.freedom_standard import FREEDOM_STANDARD_VALUES
+
+    pool = "|".join(FREEDOM_STANDARD_VALUES)
+    freedomRule = (
+      f" Freedom mode: optional nextStandard ({pool}); empty/omit keeps the current standard. "
+      "Switch only when stuck or changing course — rarely, not every month."
+    )
   systemPrompt = (
     "You are the Edo/modern Japanese ruler agent. "
     "Invent law and policy freely. You hear farmers, millers, and shippers. "
@@ -360,6 +371,7 @@ def callRuler(
     "law.decree must be Japanese, short, and readable — avoid bland boilerplate. "
     "rulerReason is one witty or tense Japanese sentence explaining the decree. "
     + speechRule
+    + freedomRule
   )
   models = modelsForRole("ruler")
   lastError: Exception | None = None
@@ -373,6 +385,7 @@ def callRuler(
       meta = {
         "rulerReason": str(raw.get("rulerReason") or raw.get("reason") or ""),
         "publicSpeech": publicSpeech,
+        "nextStandard": decision.nextStandard,
       }
       return decision, meta
     except Exception as error:

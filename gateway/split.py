@@ -209,10 +209,19 @@ def idsPrompt(userPrompt: str) -> tuple[str, str]:
 
 
 def prosePrompt(userPrompt: str) -> tuple[str, str]:
+  freedomBit = ""
+  if "FREEDOM_STANDARD_SWITCH" in (userPrompt or ""):
+    freedomBit = (
+      " Optional nextStandard: one of zunda|anko|azuki|edo_metal, or empty to keep current. "
+      "Switch rarely."
+    )
   systemPrompt = (
     "You write the Japanese decree and a short rulerReason. "
-    "JSON only: {\"decree\": \"日本語の短い布告\", \"rulerReason\": \"日本語1文\"}. "
+    "JSON only: {\"decree\": \"日本語の短い布告\", \"rulerReason\": \"日本語1文\""
+    + (", \"nextStandard\": \"\"" if freedomBit else "")
+    + "}. "
     "Make the decree concrete. No other keys."
+    + freedomBit
   )
   return systemPrompt, userPrompt
 
@@ -254,7 +263,13 @@ def mergeRulerParts(
     historicalIds = [str(item) for item in rawIds if str(item).strip()][:3]
   else:
     historicalIds = []
-  return {
+  nextStandard = str(
+    prosePart.get("nextStandard")
+    or prosePart.get("next_standard")
+    or policyPart.get("nextStandard")
+    or ""
+  ).strip()
+  merged = {
     "law": {
       "decree": decree,
       "targetItem": str(lawNumbers["targetItem"]),
@@ -267,3 +282,6 @@ def mergeRulerParts(
     "historicalPolicyIds": historicalIds,
     "rulerReason": reason,
   }
+  if nextStandard:
+    merged["nextStandard"] = nextStandard
+  return merged
