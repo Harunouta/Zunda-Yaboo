@@ -178,6 +178,7 @@ LLM 呼び出しは **推論（inference）** です。月次ループに重み�
 
 | モード | 出所 |
 |--------|------|
+| `--no-speech` | 常に none（`speechSource=disabled`）。カタログも LLM 演説も出さない。布告・統治者 LLM・市井 LLM は残る |
 | `--historical-policy` | `data/events/speeches/catalog.yaml` のみ（為政者 LLM 増なし）。無い月は decree のみ |
 | 自由プレイ + `--llm` | 同じ状況キー／eventId なら **カタログ優先**（似た状況→似た文）。無いときだけ ruler JSON の `publicSpeech` |
 | `--no-llm` | カタログがあればそれ、なければ none（定型演説は増やさない） |

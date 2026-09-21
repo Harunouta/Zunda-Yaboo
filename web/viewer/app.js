@@ -898,6 +898,7 @@ async function launchRun() {
     runName: document.getElementById("runName").value.trim(),
     noLlm: document.getElementById("noLlm").checked,
     historicalPolicy: document.getElementById("historicalPolicy").checked,
+    noSpeech: document.getElementById("noSpeech").checked,
     resume: document.getElementById("resume").checked,
     confirmFullSpan: document.getElementById("confirmFullSpan").checked,
   };

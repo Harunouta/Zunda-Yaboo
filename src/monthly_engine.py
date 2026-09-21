@@ -540,6 +540,7 @@ def runMonthlySimulation(
   useLlm: bool = True,
   resume: bool = False,
   historicalPolicy: bool = False,
+  noSpeech: bool = False,
   logPath: Path | None = None,
   checkpointPath: Path | None = None,
   anomalyPath: Path | None = None,
@@ -601,6 +602,7 @@ def runMonthlySimulation(
       "start": start,
       "end": end,
       "historicalPolicy": historicalPolicy,
+      "noSpeech": noSpeech,
     }
     logPath.write_text("", encoding="utf-8")
 
@@ -658,7 +660,7 @@ def runMonthlySimulation(
     hasFxSpeech = eventsHaveFxIntervention(eventPayloads)
     catalogSpeechHit = lookupSpeech(yearMonth, events) is not None
     monthIsAbnormal = isAbnormalMonth(events, disasterMultiplier)
-    wantSpeech = shouldEmitPublicSpeech(
+    wantSpeech = (not noSpeech) and shouldEmitPublicSpeech(
       yearMonth=yearMonth,
       events=events,
       isAbnormal=monthIsAbnormal,
@@ -688,16 +690,19 @@ def runMonthlySimulation(
         useLlm=useLlm,
         emitPublicSpeech=needLlmSpeech,
       )
-    publicSpeech, speechSource, speechId = resolvePublicSpeech(
-      yearMonth=yearMonth,
-      events=events,
-      historicalPolicy=bool(historicalPolicy and liveStandard in HISTORY_STANDARDS),
-      useLlm=useLlm,
-      isAbnormal=monthIsAbnormal,
-      regimeChange=regimeChange,
-      hasFxIntervention=hasFxSpeech,
-      llmPublicSpeech=llmPublicSpeech,
-    )
+    if noSpeech:
+      publicSpeech, speechSource, speechId = "", "disabled", ""
+    else:
+      publicSpeech, speechSource, speechId = resolvePublicSpeech(
+        yearMonth=yearMonth,
+        events=events,
+        historicalPolicy=bool(historicalPolicy and liveStandard in HISTORY_STANDARDS),
+        useLlm=useLlm,
+        isAbnormal=monthIsAbnormal,
+        regimeChange=regimeChange,
+        hasFxIntervention=hasFxSpeech,
+        llmPublicSpeech=llmPublicSpeech,
+      )
     leaderPrompt = buildLeaderPrompt(
       events,
       yearMonth,
@@ -1156,6 +1161,7 @@ def runMonthlySimulation(
         "leaderPrompt": leaderPrompt,
         "crowdPrompt": crowdPrompt,
         "historicalPolicy": historicalPolicy,
+        "noSpeech": noSpeech,
         "rulerReason": behavior["rulerReason"],
         "publicSpeech": publicSpeech or None,
         "speechSource": speechSource,

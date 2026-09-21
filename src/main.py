@@ -45,6 +45,12 @@ def buildParser() -> argparse.ArgumentParser:
     action="store_true",
     help="History-following policy knobs (metal/gold/dollar). Validity baseline uses this with edo_metal.",
   )
+  parser.add_argument(
+    "--no-speech",
+    dest="noSpeech",
+    action="store_true",
+    help="Disable ruler publicSpeech / heardSpeech (catalog and LLM). Decrees and other LLM stay on.",
+  )
   parser.add_argument("--probe", action="store_true", help="Probe LM Studio models and exit")
   parser.add_argument("--validate-baseline", action="store_true", help="Run validity baselines and exit")
   parser.add_argument(
@@ -122,6 +128,7 @@ def main(argv: list[str] | None = None) -> int:
     f"Start standard={args.standard} engine={engineStandard} followRegimes={followRegimes} "
     f"range={args.start}..{args.end} "
     f"llm={args.useLlm} resume={args.resume} historicalPolicy={historicalPolicy} "
+    f"noSpeech={args.noSpeech} "
     f"opinionLeaders={args.opinion_leaders} opinionParallel={args.opinion_parallel} "
     f"agriLlm={args.agriLlm} agriParallel={args.agri_parallel} "
     f"log={logPath or 'logs/monthly_run.jsonl'}",
@@ -134,6 +141,7 @@ def main(argv: list[str] | None = None) -> int:
     useLlm=args.useLlm,
     resume=args.resume,
     historicalPolicy=historicalPolicy,
+    noSpeech=args.noSpeech,
     logPath=logPath,
     seed=args.seed,
     opinionLeaderCount=args.opinion_leaders,

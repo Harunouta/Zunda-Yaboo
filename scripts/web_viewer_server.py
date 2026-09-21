@@ -101,6 +101,7 @@ def writeRunLaunchMeta(runName: str, body: dict) -> None:
     "end": body.get("end"),
     "noLlm": body.get("noLlm"),
     "historicalPolicy": body.get("historicalPolicy"),
+    "noSpeech": body.get("noSpeech"),
     "settings": public,
   }
   (runDir / "launch.json").write_text(
@@ -149,6 +150,7 @@ def startJob(body: dict) -> dict:
   end = str(body.get("end") or "1853-12")
   noLlm = bool(body.get("noLlm", True))
   historicalPolicy = bool(body.get("historicalPolicy", False))
+  noSpeech = bool(body.get("noSpeech", False))
   resume = bool(body.get("resume", False))
   confirmFullSpan = bool(body.get("confirmFullSpan", False))
   runName = str(body.get("runName") or "viewer_short")
@@ -177,6 +179,7 @@ def startJob(body: dict) -> dict:
     "end": end,
     "noLlm": noLlm,
     "historicalPolicy": historicalPolicy,
+    "noSpeech": noSpeech,
     "resume": resume,
   })
   llmEnv = llm_settings.settingsEnv()
@@ -196,6 +199,8 @@ def startJob(body: dict) -> dict:
   ]
   if historicalPolicy:
     cmd.append("--historical-policy")
+  if noSpeech:
+    cmd.append("--no-speech")
   if resume:
     cmd.append("--resume")
 
@@ -250,6 +255,8 @@ def startJob(body: dict) -> dict:
       ]
       if historicalPolicy:
         dockerCmd.append("--historical-policy")
+      if noSpeech:
+        dockerCmd.append("--no-speech")
       if resume:
         dockerCmd.append("--resume")
       proc = subprocess.Popen(
