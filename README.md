@@ -1,5 +1,7 @@
 # Zunda-Yaboo — 江戸幕府〜現代 月次経済シミュレーション
 
+**第三者・AI の起動／検証は [`Starter/README.md`](Starter/README.md) が正本です**（Docker・viewer・モデル取得。Cursor 不要）。
+
 **[ver1](https://github.com/Harunouta/Zunda-Yaboo/tree/v1)** — このバージョンは「ずんパラふぉーすネタ用」です。
 
 江戸幕府開府（**1603-01**）から **2026-08** まで、1ヶ月=1ターンで回します。  

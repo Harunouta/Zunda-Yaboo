@@ -21,6 +21,7 @@ This repo is prepared for a public GitHub release.
 | `scripts/**` (except local smoke secrets) | Tooling |
 | `config/default.yaml` | Defaults (no secrets) |
 | `Dockerfile`, `docker-compose.yml`, `entrypoint.sh` | Container recipe |
+| `Starter/**` | Third-party / AI boot kit (compose, scripts, MODEL setup; no weights) |
 | `requirements.txt` | Declares PyYAML only |
 | `README.md`, `MODELS.md`, `LICENSE`, this file | Docs (not local handoff files) |
 | `licenses/**` | Attribution |
@@ -81,6 +82,7 @@ Always re-check upstream LICENSE before a public release.
 zunda-yaboo/
   LICENSE                 # MIT — code only
   REDISTRIBUTION.md       # this file
+  Starter/                # OK — third-party boot (no weights)
   licenses/THIRD_PARTY.md
   data/
     redistributable/      # OK

@@ -1,3 +1,5 @@
+# Prefer Starter/docker-compose.yml for third-party boot (8765 viewer + full workspace mount).
+# This root file remains a minimal sim-oriented example.
 services:
   llm-gateway:
     build:
